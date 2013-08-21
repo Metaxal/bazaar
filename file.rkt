@@ -1,14 +1,13 @@
 #lang racket/base
-
-;;; Copyright (C) Laurent Orseau, 2010
-;;; GNU General Public Licence 3 (http://www.gnu.org/licenses/)
-
-(provide (all-defined-out))
+;;; Copyright (C) Laurent Orseau, 2010-2013
+;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
 (require racket/file
          racket/list
          racket/string
          racket/path)
+
+(provide (all-defined-out))
 
 ;; Find all files in base-dir (see find-files)
 ;; that match at least one pattern in 'patterns'

@@ -1,7 +1,12 @@
 #lang racket/base
+;;; Copyright (C) Laurent Orseau, 2010-2013
+;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
-;;; Copyright (C) Laurent Orseau, 2010
-;;; GNU General Public Licence 3 (http://www.gnu.org/licenses/)
+
+(require racket/performance-hint
+         racket/list
+         racket/vector
+         )
 
 (provide (rename-out [create-matrix make-matrix])
          matrix?
@@ -19,11 +24,6 @@
          matrix-for-each
          matrix-nrows
          matrix-ncols
-         )
-
-(require racket/performance-hint
-         racket/list
-         racket/vector
          )
 
 (define-struct matrix 

@@ -1,16 +1,15 @@
 #lang racket/base
-
-;;; Copyright (C) Laurent Orseau, 2010
-;;; GNU General Public Licence 3 (http://www.gnu.org/licenses/)
-
-(provide preferences%
-         make-config-file-path
-         )
+;;; Copyright (C) Laurent Orseau, 2010-2013
+;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
 (require racket/dict
          racket/file
          racket/class
          racket/match
+         )
+
+(provide preferences%
+         make-config-file-path
          )
 
 ;;; Simple preferences module to ensure forward-compatibility

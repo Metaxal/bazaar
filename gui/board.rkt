@@ -1,16 +1,11 @@
-#lang racket/gui
+#lang racket/base 
+;;; Copyright (C) Laurent Orseau, 2010-2013
+;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
-(require "../matrix.rkt")
-
-#| MVC
-
-To make a real separation between graphics and model,
-the initialization should take a matrix as argument.
--> init the matrix and the gui separately.
-
-But we can provide one in case none is provided?
-
-|#
+(require "../matrix.rkt"
+         racket/gui/base
+         racket/class
+         racket/match)
 
 (provide board%
          make-board
@@ -33,6 +28,18 @@ But we can provide one in case none is provided?
          board-get-matrix
          board-set-matrix
          )
+
+#| MVC
+
+To make a real separation between graphics and model,
+the initialization should take a matrix as argument.
+-> init the matrix and the gui separately.
+
+But we can provide one in case none is provided?
+
+|#
+
+
 
 (define no-pen     (make-object pen% "BLACK" 1 'transparent))
 (define black-pen  (make-object pen% "BLACK" 1 'solid))

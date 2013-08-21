@@ -1,14 +1,12 @@
-#lang racket
+#lang racket/base
+;;; Copyright (C) Laurent Orseau, 2010-2013
+;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
-;;; Copyright (C) Laurent Orseau, 2010
-;;; GNU General Public Licence 3 (http://www.gnu.org/licenses/)
-
-(provide (all-defined-out)
-         )
-
-(require (for-syntax racket/syntax)
+(require (for-syntax racket/syntax racket/base)
          "define.rkt"
          )
+
+(provide (all-defined-out))
 
 ;;; Creates getters and setters based on identifiers names.
 ;;; Can be used with `define-properties'.

@@ -1,5 +1,9 @@
 #lang slideshow
+;;; Copyright (C) Laurent Orseau, 2010-2013
+;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
+(require "../mutation.rkt")
+         
 (provide build-table-of-contents
          section/slide
          subsection/slide
@@ -9,8 +13,6 @@
          current-slide-subsection
          )
 
-(require "../mutation.rkt")
-         
 #;(define-syntax-rule (++ var)
   (set! var (add1 var)))
 

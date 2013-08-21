@@ -1,7 +1,6 @@
 #lang racket/base
-
-;;; Laurent Orseau <laurent orseau gmail com> -- 2010-02-10
-;;; License: WTFPL
+;;; Copyright (C) Laurent Orseau, 2010-2013
+;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
 (require srfi/13
          racket/dict)

@@ -1,14 +1,13 @@
 #lang racket/base
-(require racket/string
-         racket/format)
-
 ;;; Copyright (C) Laurent Orseau, 2010-2013
-;;; GNU General Public Licence 3 (http://www.gnu.org/licenses/)
+;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
+
+(require racket/string
+         racket/format
+         racket/date)
 
 (provide (all-defined-out)
          (all-from-out racket/date))
-
-(require racket/date)
 
 (define (current-date-string [time #t] [format (date-display-format)]
                              #:date [d (current-date)])

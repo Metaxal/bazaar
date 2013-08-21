@@ -1,7 +1,6 @@
 #lang slideshow
-
-;;; Copyright (C) Laurent Orseau, 2010
-;;; GNU General Public Licence 3 (http://www.gnu.org/licenses/)
+;;; Copyright (C) Laurent Orseau, 2010-2013
+;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
 (require racket/draw ; for color%
          "../draw/color.rkt")

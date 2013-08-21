@@ -1,12 +1,15 @@
-#lang racket/gui
+#lang racket/base
+;;; Copyright (C) Laurent Orseau, 2010-2013
+;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
 ;;; Notification box.
 ;;; Creates a frame that is always visible (under X: on each workspace),
 ;;; does not take keyboard focus, has no resize-border, no title,
 ;;; no system menu, no menu bar.
 
-(provide float-box%
-         )
+(require racket/gui/base racket/class)
+
+(provide float-box%)
 
 (define float-box%
   (class frame%

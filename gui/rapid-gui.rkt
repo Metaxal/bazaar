@@ -1,5 +1,10 @@
-#lang racket/gui
-(require (for-syntax syntax/parse))
+#lang racket/base
+;;; Copyright (C) Laurent Orseau, 2010-2013
+;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
+
+(require racket/gui/base
+         racket/class
+         (for-syntax syntax/parse racket/base))
 
 ;;;    *********************    ;;;
 ;;;    ***   Rapid Gui   ***    ;;;
