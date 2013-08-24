@@ -12,14 +12,19 @@
                #f '(ok stop)))
 
 ;; Syntactic salt for msg-error
-(define-syntax-rule (with-msg-box-error-handler body ...)
+(define-syntax-rule (with-error-to-msg-box body ...)
   (with-handlers ([exn:fail? msg-error-box])
     body ...
     ))
+
+(define-syntax-rule (with-error-to-error-port body ...)
+  (with-handlers ([exn:fail? (λ(e)(displayln (exn-message e)
+                                             (current-error-port)))])
+    body ...))
   
 ;; Examples
 (module+ main
-  (with-msg-box-error-handler
+  (with-error-to-msg-box
    (printf "before\n")
    (error "inside")
    (printf "after")
