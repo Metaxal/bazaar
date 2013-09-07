@@ -29,3 +29,11 @@
 
 (define-syntax-rule (append2! l l2)
   (set! l2 (append l l2)))
+
+;;; Strings
+
+(define-syntax-rule (strappend! str s ...)
+  (set! str (string-append str s ...)))
+
+(define-syntax-rule (surround! l str r)
+  (set! str (string-append l str r)))

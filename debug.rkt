@@ -6,6 +6,7 @@
                      racket/base))
 
 (provide debug-var
+         debug-expr
          info-str
          ok)
 
@@ -24,7 +25,14 @@
    [(_ var:id)
     (with-syntax ([line (syntax-line #'var)]
                   [file (syntax-source-file-name #'var)])
-      #'(printf "~a:~a ~a=~a" file line 'var var))]))
+      #'(printf "~a:~a ~a=~v\n" file line 'var var))]))
+
+;; Surround an expr with this procedure to output 
+;; its value transparently
+(define (debug-expr expr)
+  (write expr)
+  (newline)
+  expr)
 
 (define (info-str fmt . args)
   (display (string-append (apply format fmt args) "... ")))

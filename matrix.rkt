@@ -46,8 +46,7 @@
                  '(0 0) ; initial pos
                  (λ(pos)(< (first pos) nrow)) ; existing position ?
                  (lambda _ #t)
-                 (lambda _ #t))))))
-  )
+                 (lambda _ #t)))))))
 
 (begin-encourage-inline
 

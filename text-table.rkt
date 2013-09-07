@@ -16,7 +16,7 @@
 
 ;; head : (or '< '+ '> (col len))
 
-(struct table (head dash sep first-line mid-line last-line)
+(struct atable (head dash sep first-line mid-line last-line)
   #:transparent)
 
 (define (table-map t f-col ch-deb ch ch-end)
@@ -30,44 +30,41 @@
                                 (set! n (+ 1 n)))]
              ;[(string? s) (f-col s (string-length s))]
              ))
-     (table-head t))))
+     (atable-head t))))
 
-(define (print-table-row t row)
-  (displayln
+(define (table-row t row)
     (apply string-append
            (table-map t 
                       (λ(n str len) 
                         (string-pad-right (->string (list-ref row n)) len))
-                      (table-sep t) (table-sep t) (table-sep t)
-                      ))))
+                      (atable-sep t) (atable-sep t) (atable-sep t)
+                      )))
 
-(define (print-table-head t)
-  (displayln
+(define (table-head t)
    (apply string-append
           (table-map t 
                      (λ(n str len)
                        (string-pad-right (->string str) len))
-                     (table-sep t) (table-sep t) (table-sep t))
-          )))
+                     (atable-sep t) (atable-sep t) (atable-sep t))
+          ))
 
-(define (print-table-line t getter)
-  (displayln
+(define (table-line t getter)
     (apply string-append
            (apply table-map t 
                   (λ(n str len) 
-                    (build-string len (λ(n)(table-dash t))))
+                    (build-string len (λ(n)(atable-dash t))))
                   (getter t)
-                  ))))
-(define (print-table-first-line t)
-  (print-table-line t table-first-line))
-(define (print-table-mid-line t)
-  (print-table-line t table-mid-line))
-(define (print-table-last-line t)
-  (print-table-line t table-last-line))
+                  )))
+(define (table-first-line t)
+  (table-line t atable-first-line))
+(define (table-mid-line t)
+  (table-line t atable-mid-line))
+(define (table-last-line t)
+  (table-line t atable-last-line))
 
 ;; borders: (or 'normal 'rounded 'double)
 (define (table-framed head [borders 'rounded])
-  (apply table head
+  (apply atable head
          (dict-ref 
           '((normal   . (#\─ "│" ("┌" "┬" "┐") ("├" "┼" "┤") ("└" "┴" "┘")))
             (rounded  . (#\─ "│" ("╭" "┬" "╮") ("├" "┼" "┤") ("╰" "┴" "╯")))
@@ -81,12 +78,13 @@
                            ;'normal
                            ;'rounded
                            ))
-  (print-table-first-line t1)
-  (print-table-head t1)
-  (print-table-mid-line t1)
-  (print-table-mid-line t1)
-  (print-table-row t1 '(a b c))
-  (print-table-mid-line t1)
-  (print-table-row t1 '(x y "z"))
-  (print-table-last-line t1)
+  (for-each displayln 
+            (list (table-first-line t1)
+                  (table-head t1)
+                  (table-mid-line t1)
+                  (table-mid-line t1)
+                  (table-row t1 '(a b c))
+                  (table-mid-line t1)
+                  (table-row t1 '(x y "z"))
+                  (table-last-line t1)))
   )

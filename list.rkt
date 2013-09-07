@@ -14,7 +14,9 @@
   (list-ref l (random (length l))))
 
 (define (transpose ll)
-  (apply map list ll))
+  (if (empty? ll)
+      ll
+      (apply map list ll)))
 
 (module+ test
   (check-equal? (transpose '((a b c) (1 2 3)))
