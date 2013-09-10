@@ -3,8 +3,7 @@
 ;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
 (require (for-syntax racket/syntax 
-                     racket/base
-                     #;racket/class)
+                     racket/base)
          "define.rkt"
          racket/class ; because of define/public
          )
@@ -61,9 +60,9 @@
 ;(define-syntax-rule (define/setter ....
 
 
-;; Ditto for module-wise definitions.
+;;; Ditto for module-wise definitions/attributes (not class attributes)
 
-; No need for the getter. Provide it instead.
+; No need for the getter. Provide the identifier instead.
 ;(define-syntax-rule (m-getter id ...)
 ;  (define-getter define id ...))
 
@@ -80,6 +79,7 @@
 
 ;(define/m-setter x 3)
 
+;; TODO: rackunit tests
 #| | #
 
 (define-syntax-rule (make-setter var)
