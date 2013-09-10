@@ -1,3 +1,12 @@
 #lang setup/infotab
 
-(define deps (list "base"))
+(define deps
+ '("base"
+   "draw-lib"
+   "gui-lib"
+   "images"
+   "rackunit-lib"
+   "scribble-lib"
+   "slideshow-lib"
+   "srfi-lite-lib"
+   ))
