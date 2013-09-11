@@ -3,6 +3,7 @@
 ;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
 (require racket/list
+         racket/contract
          syntax/parse/define)
 
 (provide (all-defined-out))
@@ -52,4 +53,15 @@
 ;   (list z y x))
 ;-> '(c b a)
 
+;; Replaces the last element of l by x.
+;; If l is empty, the empty list is returned.
+(define/contract (replace-last l x)
+  (list? any/c . -> . list?)
+  (cond [(null? l) '()]
+        [(null? (cdr l)) (list x)]
+        [else (cons (car l) (replace-last (cdr l) x))]))
+
+(module+ test
+  (check-equal? (replace-last '() 'a) '())
+  (check-equal? (replace-last '(a b c) 'a) '(a b a)))
 
