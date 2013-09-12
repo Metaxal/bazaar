@@ -32,9 +32,11 @@ comparator: (or (λ(val1 val2) -> boolean?)
                 )
     (init [min-height 0]
           [style '()]
-          [callback void])
+          [[inner-callback callback] void])
     
-    (when (and comparators (not (= (length comparators) (length columns))))
+    (unless comparators
+      (set! comparators (build-list (length columns) (λ(n) (λ _ #t)))))
+    (when (not (= (length comparators) (length columns)))
       (error "labels and comparators must have the same length"))
     
     (when (not (= (length min-widths) (length columns)))
@@ -45,7 +47,7 @@ comparator: (or (λ(val1 val2) -> boolean?)
                [callback (λ(lb ev)
                            (if (eq? (send ev get-event-type) 'list-box-column)
                                (this-sort (send ev get-column))
-                               (callback lb ev)))]
+                               (inner-callback lb ev)))]
                [choices '()]
                [style (append style '(column-headers clickable-headers))]
                )
@@ -86,7 +88,7 @@ comparator: (or (λ(val1 val2) -> boolean?)
              [comparator (if (procedure-arity-includes? comparator 2)
                              ; takes only two elements, transform to take 4:
                              (λ(val-data1 val-data2)(comparator (first val-data1) (first val-data2)))
-                             ; else, supposed to alraedy take 4 arguments:
+                             ; else, supposed to already take 4 arguments:
                              (λ(val-data1 val-data2)(apply comparator (append val-data1 val-data2)))
                              )]
              [comparator (if (equal? last-sorted num-column) (negate comparator) comparator)]
@@ -94,10 +96,8 @@ comparator: (or (λ(val1 val2) -> boolean?)
                             comparator
                             #:key (λ(l)(list (list-ref (first l) num-column) (second l)))
                             )])
-        (clear)
         (set! lb-values lb-vals)
         (update)
-        ;(for-each (λ(l)(this-append (first l) (second l))) lb-vals)
         (set! last-sorted (if last-sorted #f num-column))
         ))
         
@@ -137,14 +137,12 @@ comparator: (or (λ(val1 val2) -> boolean?)
                     [callback (λ(lb ev)
                                 (case (send ev get-event-type)
                                   [(list-box-column) (displayln (send ev get-column))])
-                                (displayln ))]))
+                                (displayln (send lbc2 get-selection)))]))
   
   (define ll
     (for/list ([i 30])
       (build-list 3 (λ(n)(random 100)))))
   (send lbc set-choices ll)
-  #;(for ([l ll]) 
-    (send lbc  append (map number->string l) l))
   
   (send/apply lbc2 set (map (λ(l)(map number->string l)) (transpose ll)))
   (send lbc2 append "coucou" "plop")
