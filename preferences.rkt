@@ -69,6 +69,10 @@
     ;; (and a next load will also use this file)
     (define/public (load [pfile #t] #:clear? [clear? #f])
       (when clear? (clear))
+      (when (and (path-string? pfile)
+                 (not (file-exists? pfile)))
+        (log-warning "Preference file ~a does not exist. Loading defaults."
+                     pfile))
       (when pfile
         (let* ([pfile (if (eq? pfile #t) file pfile)]
                [prefs (if (and (path-string? pfile) 
