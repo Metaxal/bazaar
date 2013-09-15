@@ -2,8 +2,7 @@
 ;;; Copyright (C) Laurent Orseau, 2010-2013
 ;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
-(require racket/string
-         racket/format
+(require racket/format
          racket/date)
 
 (provide (all-defined-out)
@@ -11,20 +10,23 @@
 
 ;; Returns the string of the current date with the specified date-display-format.
 ;; Just saves the use of a parameterize and date->string and (current-date)
-(define (current-date-string [time #t] [format (date-display-format)]
-                             #:date [d (current-date)])
+(define (date->format [d (current-date)] [format (date-display-format)]
+                              #:time? [time? #t])
   (parameterize ([date-display-format format])
-    (date->string d time)))
+    (date->string d time?)))
 
-(define (date-rfc [time #t] #:date [d (current-date)])
-  (current-date-string time 'rfc2822))
+(define (date-rfc [d (current-date)] #:time? [time? #t])
+  (date->format d 'rfc2822 #:time? time?))
 
-(define (date-iso [time #t] #:date [d (current-date)])
-  (current-date-string time 'iso-8601))
+(define (date-iso [d (current-date)] #:time? [time? #t])
+  (date->format d 'iso-8601 #:time? time?))
 
 ;; Returns the date string with the numbers in iso order (lexicographical order)
 ;; Separators can be modified.
-;; Can print the year-month-day alone, the time alone or both
+;; Can print the year-month-day alone, the time alone or both.
+;; The default format is like `date-iso' without the "T"
+;; (the problem with the "T" is that it makes day and hours difficult to separate visually,
+;; An underscore would probably have been a better separator for the iso norm...)
 (define (date-iso-like [d (current-date)]
                        #:time? [time? #t]
                        #:seconds? [seconds? #t]
@@ -67,6 +69,9 @@
   (require rackunit)
   
   (define d (date* 3 4 5 1 2 2013 3 232 #t 7200 43508052 "CEST"))
+  
+  (check-equal? (date-iso d)
+                "2013-02-01T05:04:03")
   
   (check-equal? (date-iso-like d)
                 "2013-02-01 05:04:03")
