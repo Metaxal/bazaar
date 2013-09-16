@@ -18,6 +18,9 @@ But Racket's list-box is such a mess for multi-column handling that I didn't see
 way around: list-box% has no `get' method, and no `append-list', the initial `choices' is 
 useless, etc.
 
+TODO:
+- Keep the current selection active, when sorting
+
 
 comparators: (list-of comparator)
 comparator: (or (λ(val1 val2) -> boolean?) 
@@ -60,8 +63,9 @@ comparator: (or (λ(val1 val2) -> boolean?)
     
     (define (update)
       ; Not very efficient...
-      (unless (empty? lb-values)
-        (send/apply this set (transpose (map first lb-values)))))
+      (if (empty? lb-values)
+          (clear)
+          (send/apply this set (transpose (map first lb-values)))))
     
     ;; rows: list of rows. Elements of the rows are turned into strings.
     ;; ldata: list of data, one per row
