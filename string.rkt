@@ -9,5 +9,11 @@
        (string-ci=? a b)))
 
 (define (string-reverse str)
+  ; Not efficient...
   (list->string (reverse (string->list str))))
 
+(define (string->string-or-false s [false-string ""])
+  (and (not (equal? s false-string)) s))
+
+(define (string-or-false->string s [false-string ""])
+  (or s false-string))
