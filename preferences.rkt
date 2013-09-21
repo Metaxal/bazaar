@@ -194,9 +194,11 @@
   (a "a")
   (check-equal? (a) "a")
   
-  (send prefs set 'a "aa") ; and save to file
+  (send prefs set 'a "aa")
   (check-equal? (get/sort prefs)
                 '((a . "aa") (b . "b")))
+  
+  (send prefs save)
   
   ; load the preferences. 'a is loaded, but 'b was not saved, so not loaded.
   (define prefs2 (new preferences% [file f]
