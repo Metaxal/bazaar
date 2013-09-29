@@ -9,7 +9,7 @@
 (provide (all-defined-out))
 
 (module+ test
-  (require rackunit))
+  (require "rackunit.rkt"))
 
 (define (choose l)
   (list-ref l (random (length l))))
@@ -65,3 +65,12 @@
   (check-equal? (replace-last '() 'a) '())
   (check-equal? (replace-last '(a b c) 'a) '(a b a)))
 
+(define/contract (remove-last l)
+  ((and/c list? (not/c empty?)) . -> . list?)
+  (cond [(null? l) '()]
+        [(null? (cdr l)) '()]
+        [else (cons (car l) (remove-last (cdr l)))]))
+
+(module+ test
+  (check-fail (remove-last '()))
+  (check-equal? (remove-last '(a b c)) '(a b)))
