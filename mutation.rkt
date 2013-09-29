@@ -2,7 +2,8 @@
 ;;; Copyright (C) Laurent Orseau, 2010-2013
 ;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
-(require syntax/parse/define)
+(require syntax/parse/define
+         racket/list)
 
 (provide (all-defined-out))
 
@@ -24,16 +25,16 @@
 (define-simple-macro (rest! var:id)
   (set! var (rest var)))
 
-(define-syntax-rule (append! l l2)
+(define-simple-macro (append! l:id l2)
   (set! l (append l l2)))
 
-(define-syntax-rule (append2! l l2)
+(define-simple-macro (append2! l:id l2)
   (set! l2 (append l l2)))
 
 ;;; Strings
 
-(define-syntax-rule (strappend! str s ...)
+(define-simple-macro (strappend! str:id s ...)
   (set! str (string-append str s ...)))
 
-(define-syntax-rule (surround! l str r)
+(define-simple-macro (surround! l str:id r)
   (set! str (string-append l str r)))
