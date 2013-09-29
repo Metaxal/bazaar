@@ -22,6 +22,8 @@
 
 (define no-elt (gensym 'no-elt))
 
+;; Like for, but returns the best element and its value when elements are compared with <?
+;; Each iteration must return the current element and its value (in this order).
 (define-syntax-rule (for/best <? (bindings ...) body ...)
   (for/fold ([best-elt no-elt] [best-val no-elt]) 
     (bindings ...)
