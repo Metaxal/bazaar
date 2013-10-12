@@ -9,4 +9,5 @@
    "scribble-lib"
    "slideshow-lib"
    "srfi-lite-lib"
+   "net-lib"
    ))
