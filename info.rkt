@@ -5,6 +5,7 @@
    "draw-lib"
    "gui-lib"
    "images"
+   "racket-index"
    "rackunit-lib"
    "scribble-lib"
    "slideshow-lib"
