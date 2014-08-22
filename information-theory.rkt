@@ -12,10 +12,12 @@
 ;;; Prefix-code for the integers:
 ;;; http://en.wikipedia.org/wiki/Universal_code_%28data_compression%29
 
+(define log_2 (log 2))
+(define 1/log_2 (/ (log 2)))
 ; See also fllog2 from math/flonum
 (define (log2 x)
-  (/ (log x)
-     (log 2)))
+  #;(* (log x) 1/log_2)
+  (/ (log x) (log 2))) ; actually better with exact numbers, e.g. the (log2 8) was returning 2.9999999999999996, which when floored, gives 2...
 
 (define unary? (listof 0))
 (define binary? (listof (or/c 0 1)))
@@ -61,11 +63,17 @@
       (* 2 (floor (log2 (+ 1 (floor (log2 x))))))
       1)))
 
+;; Same as elias-delta-length, but starts at 0 instead of 1
+(define/contract (elias-delta-length0 x)
+  (N? . -> . number?)
+  (elias-delta-length (+ x 1)))
+
 (module+ test
-  (for ([i (in-range 1 18)]
+  (for ([i (in-naturals)]
         [len '(1 4 4 5 5 5 5 8 8 8 8 8 8 8 8 9 9)])
-    (check-equal? (elias-delta-length i) len)
-    (check-equal? (length (prefix-encode i 2)) (+ len 1)))
+    (check-equal? (elias-delta-length0 i) len)
+    (check-equal? (elias-delta-length (+ i 1)) len)
+    (check-equal? (length (prefix-encode (+ i 1) 2)) (+ len 1)))
   
   )
 
