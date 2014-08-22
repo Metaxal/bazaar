@@ -42,7 +42,7 @@
       (begin (node-proc (first tree))
              (for-each (λ(t)(tree-for-each t node-proc leaf-proc))
                        (rest tree)))
-      (leaf-proc tree)))
+      (void (leaf-proc tree))))
 
 ; like fold but for trees, where the initial values are leaf values (modified by leaf-proc)
 ; node-proc accumulates the children return values
