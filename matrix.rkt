@@ -80,16 +80,16 @@
     (for/list ([j (in-range (matrix-ncols mat))])
       (matrix-ref mat i j))))
 
-(define-inline (coord->index row col row-size)
+(define (coord->index row col row-size)
   (+ (* row row-size) col))
 
-(define-inline (matrix-ref mat row col)  
+(define (matrix-ref mat row col)  
   (vector-ref (matrix-mat mat) (coord->index row col (matrix-ncols mat))))
 
-(define-inline (matrix-set! mat row col val)  
+(define (matrix-set! mat row col val)  
   (vector-set! (matrix-mat mat) (coord->index row col (matrix-ncols mat)) val))
 
-(define-inline (matrix-update! mat row col updater)
+(define (matrix-update! mat row col updater)
   (let ([coord (coord->index row col (matrix-ncols mat))]
         [m (matrix-mat mat)])
     (vector-set! m coord  
@@ -108,10 +108,6 @@
   (for* ([i (in-range (matrix-nrows mat))]
          [j (in-range (matrix-ncols mat))])
     (proc i j (matrix-ref mat i j))))
-
-
-(define (init-random mat)  
-  (matrix-map! mat (λ(i j v) 0)))
 
 (define (matrix-ref-cycle mat r c)  
   (let ([rows (matrix-nrows mat)]        
