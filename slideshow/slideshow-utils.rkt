@@ -22,6 +22,12 @@
 (define text-frame (compose frame (inseter 5)))
 (define text-double-frame (compose frame (inseter 2) frame (inseter 5)))
 
+(define (rounded-frame p
+                       #:inset [in 2] #:corner-radius [radius -0.25]
+                       #:angle [angle 0])
+  (cc-superimpose p (rounded-rectangle (+ (pict-width p) in) (+ (pict-height p) in)
+                                       radius #:angle angle)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;   And Now for Something Completely Different   ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
