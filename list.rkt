@@ -33,6 +33,8 @@
 (define (add-before l elt)
   (append-map (λ(e)(list elt e)) l))
 
+;;; These should be in values.rkt instead
+
 ;; Return the multiple values of proc-call as a list
 (define-syntax-rule (call/values->list expr)
   (call-with-values (λ()expr) (λ l l)))
@@ -42,7 +44,7 @@
 
 (define-simple-macro (define-list (var:id ...) e:expr)
   (define-values (var ...) 
-    (apply values expr)))
+    (apply values e)))
 ; Example:
 ; (define-list (a b c) (list 1 2 3))
 
