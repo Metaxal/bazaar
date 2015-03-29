@@ -8,7 +8,6 @@
          racket/match)
 
 (provide board%
-         make-board
          board-draw
          board-make-cell-pic
          board-cell-pic
@@ -245,10 +244,6 @@ But we can provide one in case none is provided?
       (on-char-ext ch))
     
     ))
-
-;; Prefer to use: new board [title ...]
-(define (make-board #:title [t "Board"] . r)
-  (apply make-object board% t r))
 
 (define-syntax-rule (board-draw board ms body ...)
   (begin 
