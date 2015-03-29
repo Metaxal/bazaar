@@ -23,7 +23,6 @@
          board-ref
          board-set!
          board-ref-canvas
-         board-closed?
          board-get-matrix
          board-set-matrix
          )
@@ -287,9 +286,6 @@ But we can provide one in case none is provided?
 
 (define (board-draw-cell-pic board x y pic)
   (send board draw-cell-pict x y pic))
-
-(define (board-closed? board)
-  (send board closed?)) 
 
 (define (board-get-matrix board)
   (send board get-matrix))
