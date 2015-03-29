@@ -55,7 +55,7 @@
 (define (matrix-copy! to-mat mat)
   (vector-copy! (matrix-mat to-mat) 0 (matrix-mat mat)))
 
-(define (matrix-copy mat [to-mat #f])
+(define (matrix-copy mat)
   (make-matrix (matrix-nrows mat) (matrix-ncols mat)
                (vector-copy (matrix-mat mat))))
 
