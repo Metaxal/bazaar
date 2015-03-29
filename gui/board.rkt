@@ -19,7 +19,6 @@
          blue-pen
          red-pen
          no-brush
-         ;blue-brush
          board-ref
          board-set!
          board-ref-canvas
@@ -46,29 +45,6 @@ But we can provide one in case none is provided?
 
 (define no-brush (make-object brush% "white" 'transparent))
 ;(define blue-brush (make-object brush% "blue" 'solid))
-
-;(define (get-parent-frame child)
-;  (if parent-frame
-;      parent-frame
-;      (begin
-;        (set! parent-frame child)
-;        #f)))
-;
-;(define parent-frame #f)
-;;(define first-child #f)
-;
-;(define my-frame% 
-;  (class frame%
-;    (init-field my-on-close)
-;    (super-new [parent (get-parent-frame this)])
-;    ;(unless first-child (set! first-child this))
-;    (define/augment (on-close)
-;      ;(when (equal? first-child this)
-;      ;  (send parent-frame on-exit)
-;      ;  (send parent-frame show #f))
-;      (my-on-close))
-;;      (set! closed #t))
-;    ))
 
 (define board%
   (class canvas%
