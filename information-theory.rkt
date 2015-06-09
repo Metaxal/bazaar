@@ -55,6 +55,18 @@
 (define (exp-golomb x)
   (prefix-encode (add1 x)))
 
+;; http://en.wikipedia.org/wiki/Elias_gamma_coding
+(define/contract (elias-gamma-length x)
+  (N? . -> . number?)
+  (inexact->exact
+   (+ (* 2 (floor (log2 x)))
+      1)))
+
+;; Same as elias-gamma-length, but starts at 0 instead of 1
+(define/contract (elias-gamma-length0 x)
+  (N? . -> . number?)
+  (elias-gamma-length (+ x 1)))
+
 ;; http://en.wikipedia.org/wiki/Elias_delta_coding
 (define/contract (elias-delta-length x)
   (N? . -> . number?)
