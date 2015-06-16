@@ -2,22 +2,28 @@
 ;;; Copyright (C) Laurent Orseau, 2010-2013
 ;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
-(require racket/contract
+(require (rename-in racket/base [log ln])
+         math/flonum
+         racket/contract
+         racket/function
          racket/list)
 
-(provide (all-defined-out))
+(provide (all-defined-out) ln)
 
 (module+ test (require rackunit))
 
+(define log (thunk* (error "log should not be used. Use ln or log2 instead.")))
+
 ;;; Prefix-code for the integers:
 ;;; http://en.wikipedia.org/wiki/Universal_code_%28data_compression%29
+(define ln2 (ln 2))
 
-(define log_2 (log 2))
-(define 1/log_2 (/ (log 2)))
-; See also fllog2 from math/flonum
 (define (log2 x)
-  #;(* (log x) 1/log_2)
-  (/ (log x) (log 2))) ; actually better with exact numbers, e.g. the (log2 8) was returning 2.9999999999999996, which when floored, gives 2...
+  (/ (ln x) ln2)
+  #;(fllog2 (fl x)))
+
+(module+ test
+  (check-= (log2 (expt 10 1000)) 3321 1.))
 
 (define unary? (listof 0))
 (define binary? (listof (or/c 0 1)))
