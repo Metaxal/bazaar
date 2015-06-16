@@ -7,7 +7,7 @@
          math/bigfloat
          racket/unsafe/ops)
 
-(provide use-numeric-kind)
+(provide with-numeric-kind)
 
 (module+ test
   (require rackunit))
@@ -21,18 +21,19 @@
 
 (define op-dict
   (list
-   (list '$?   real?   fixnum?     flonum?  extflonum?      bigfloat?         fixnum?            flonum?      extflonum?)
-   (list '$    values  fx          fl       real->extfl     bf                unsafe-fx          fl           real->extfl) ; real->$
-   (list '$->  values  fx->fl      values   extfl->inexact  bigfloat->flonum  unsafe-fx->fl      values       extfl->inexact) ; $->real
-   (list '$+   +       fx+         fl+      extfl+          bf+               unsafe-fx+         unsafe-fl+   unsafe-extfl+)
-   (list '$-   -       fx-         fl-      extfl-          bf-               unsafe-fx-         unsafe-fl-   unsafe-extfl-)
-   (list '$*   *       fx*         fl*      extfl*          bf*               unsafe-fx*         unsafe-fl*   unsafe-extfl*)
-   (list '$/   /       fxquotient  fl/      extfl/          bf/               unsafe-fxquotient  unsafe-fl/   unsafe-extfl/)
-   (list '$=   =       fx=         fl=      extfl=          bf=               unsafe-fx=         unsafe-fl=   unsafe-extfl=)
-   (list '$>   >       fx>         fl>      extfl>          bf>               unsafe-fx>         unsafe-fl>   unsafe-extfl>)
-   (list '$<   <       fx<         fl<      extfl<          bf<               unsafe-fx<         unsafe-fl<   unsafe-extfl<)
-   (list '$>=  >=      fx>=        fl>=     extfl>=         bf>=              unsafe-fx>=        unsafe-fl>=  unsafe-extfl>=)
-   (list '$<=  <=      fx<=        fl<=     extfl<=         bf<=              unsafe-fx<=        unsafe-fl<=  unsafe-extfl<=)
+   (list '$?    real?   fixnum?     flonum?  extflonum?      bigfloat?         fixnum?            flonum?       extflonum?)
+   (list '$     values  fx          fl       real->extfl     bf                unsafe-fx          fl            real->extfl) ; real->$
+   (list '$->   values  fx->fl      values   extfl->inexact  bigfloat->flonum  unsafe-fx->fl      values        extfl->inexact) ; $->real
+   (list '$+    +       fx+         fl+      extfl+          bf+               unsafe-fx+         unsafe-fl+    unsafe-extfl+)
+   (list '$-    -       fx-         fl-      extfl-          bf-               unsafe-fx-         unsafe-fl-    unsafe-extfl-)
+   (list '$*    *       fx*         fl*      extfl*          bf*               unsafe-fx*         unsafe-fl*    unsafe-extfl*)
+   (list '$/    /       fxquotient  fl/      extfl/          bf/               unsafe-fxquotient  unsafe-fl/    unsafe-extfl/)
+   (list '$=    =       fx=         fl=      extfl=          bf=               unsafe-fx=         unsafe-fl=    unsafe-extfl=)
+   (list '$>    >       fx>         fl>      extfl>          bf>               unsafe-fx>         unsafe-fl>    unsafe-extfl>)
+   (list '$<    <       fx<         fl<      extfl<          bf<               unsafe-fx<         unsafe-fl<    unsafe-extfl<)
+   (list '$>=   >=      fx>=        fl>=     extfl>=         bf>=              unsafe-fx>=        unsafe-fl>=   unsafe-extfl>=)
+   (list '$<=   <=      fx<=        fl<=     extfl<=         bf<=              unsafe-fx<=        unsafe-fl<=   unsafe-extfl<=)
+   (list '$abs  abs     fxabs       flabs    extflabs        bfabs             unsafe-fxabs       unsafe-flabs  unsafe-extflabs)
    ; to complete...
    ))
 
@@ -55,20 +56,26 @@
                      )))
   (unless idx
     (error "Could not find numeric kind: " kind))
-  (list-ref (dict-ref op-dict op-sym) idx))
+  (list-ref (dict-ref op-dict op-sym
+                      (λ()(error 'get-op
+                                 "Operator ~a not found. Existing operators: ~a"
+                                 op-sym
+                                 (dict-keys op-dict))))
+            idx))
 
-(define-syntax-rule (use-numeric-kind num-kind (op ...) body ...)
+(define-syntax-rule (with-numeric-kind num-kind (op ...) body ...)
   (let ([op (get-op 'op num-kind)] ...)
     body ...))
 
 (module+ test
   (define (test-kind kind)
-    (use-numeric-kind
+    (with-numeric-kind
      kind ($ $? $= $+ $- $* $/ $> $< $>= $<=)
-     (define n ($/ ($- ($+ ($ 3) ($ 2)) ($ 15))
-                   ($ 2)))
+     (define n ($* ($/ ($- ($+ ($ 3) ($ 2)) ($ 15))
+                       ($ 2))
+                   ($ 4)))
      (check-pred $? n)
-     (check $= n ($ -5))))
-  (for ([kind '(real fx fl extfl bf)])
+     (check $= n ($ -20))))
+  (for ([kind '(real fx fl extfl bf unsafe-fx unsafe-fl unsafe-extfl)])
     (test-kind kind)))
 
