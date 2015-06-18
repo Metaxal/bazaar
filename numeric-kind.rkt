@@ -48,6 +48,7 @@
    (list '$>=    >=      fx>=        fl>=     extfl>=         bf>=              unsafe-fx>=        unsafe-fl>=     unsafe-extfl>=)
    (list '$<=    <=      fx<=        fl<=     extfl<=         bf<=              unsafe-fx<=        unsafe-fl<=     unsafe-extfl<=)
    (list '$abs   abs     fxabs       flabs    extflabs        bfabs             unsafe-fxabs       unsafe-flabs    unsafe-extflabs)
+   (list '$min   min     fxmin       flmin    extflmin        bfmin             unsafe-fxmin       unsafe-flmin    unsafe-extflmin)
    ; to complete...
    ))
 
@@ -71,10 +72,15 @@
 (define (numeric-kind-index kind)
   (subindex kind numeric-kinds))
 
+(define (existing-numeric-kinds)
+  (dict-ref op-dict '$kind))
+
 (define (get-op op-sym [kind (current-numeric-kind)])
   (define idx (numeric-kind-index kind))
   (unless idx
-    (error "Could not find numeric kind: " kind))
+    (error 'get-op "Could not find numeric kind: ~a. Existing kinds: ~a"
+           kind
+           (existing-numeric-kinds)))
   (list-ref (dict-ref op-dict op-sym
                       (λ()(error 'get-op
                                  "Operator ~a not found. Existing operators: ~a"
@@ -90,6 +96,11 @@
   (parameterize ([current-numeric-kind num-kind])
     (with-current-numeric-kind (op ...) body ...)))
 
+;; No need for a "current" parametrized version?
+#;
+(define-syntax-rule (define-for-numeric-kind (op ...))
+  (begin (define op (get-op 'op)) ...))
+
 (module+ test
   (define (test-kind kind)
     (with-numeric-kind
@@ -100,7 +111,7 @@
                    ($ 4)))
      (check-pred $? n)
      (check $= n ($ -20))))
-  (for ([kind (dict-ref op-dict '$kind)])
+  (for ([kind (existing-numeric-kinds)])
     (test-kind kind))
 
   (check-equal?
