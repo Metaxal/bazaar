@@ -4,7 +4,8 @@
          racket/list)
 
 (provide keyword-apply/dict
-         keyword-apply/simple)
+         keyword-apply/simple
+         list->pos+kw)
 
 (module+ test
   (require rackunit))
@@ -27,6 +28,7 @@
      keyword<? #:key car))
   (keyword-apply proc (map car alist) (map cdr alist) largs))
 
+;; Turns a flat list of arguments to a list of positional arguments and a dictionary of keyword/value
 (define (list->pos+kw l)
   (let loop ([l l] [pos-args '()] [kw-dict '()])
     (if (empty? l)
@@ -67,7 +69,7 @@
      '(1 2 3 4)))
   
   (check-equal?
-   (keyword-apply/simple f '(1 2 #:d 4 #:c 3))
+   (keyword-apply/simple f '(1 #:d 4 #:c 3 2))
    '(1 2 3 4))
   )
 
