@@ -1,6 +1,9 @@
 #lang racket/base
 
-(provide (all-defined-out))
+(require plot)
+
+(provide (all-defined-out)
+         (all-from-out plot))
 
 (module+ test
   (require rackunit))
@@ -28,3 +31,21 @@
   (check-equal?
    (list->points '(a b c) 2)
    '((2 a) (3 b) (4 c))))
+
+(define-syntax-rule (with-x-log-transform body ...)
+  (parameterize ([plot-x-transform log-transform]
+                 [plot-x-ticks (log-ticks)])
+    body ...))
+
+(define-syntax-rule (with-y-log-transform body ...)
+  (parameterize ([plot-y-transform log-transform]
+                 [plot-y-ticks (log-ticks)])
+    body ...))
+
+(define-syntax-rule (with-xy-log-transform body ...)
+  (parameterize ([plot-x-transform log-transform]
+                 [plot-y-transform log-transform]
+                 [plot-x-ticks (log-ticks)]
+                 [plot-y-ticks (log-ticks)])
+    body ...))
+
