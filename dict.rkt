@@ -4,13 +4,16 @@
 
 (require (prefix-in dict: racket/dict))
 
-(provide make-massoc-dict #;massoc
+(provide make-massoc
+         massoc
+         massoc->list
+         dict-transpose
          occurrences)
 
 (module+ test 
   (require rackunit))
 
-(define (make-massoc-dict . pairs)
+(define (make-massoc . pairs)
   (massoc pairs))
 
 ;; A mutable assoc-list dictionary
@@ -52,8 +55,12 @@
      (dict:dict-iterate-value (massoc-v dict) pos))
    ])
 
+;; Faster than dict->list
+(define (massoc->list m)
+  (massoc-v m))
+
 (module+ test 
-  (define d1 (make-massoc-dict '(a . 1) '(b . 2)))
+  (define d1 (make-massoc '(a . 1) '(b . 2)))
   
   (check-equal? (dict:dict-ref d1 'a) 1)
   (check-equal? (massoc-v (dict:dict-set d1 'a 3))
@@ -70,15 +77,27 @@
                 '((a 1) (c 4)))
   )
 
+(define (dict-transpose d)
+  (list (dict:dict-keys d)
+        (dict:dict-values d)))
+
 
 ;; Returns a dictionary of (e . n) where e is an element of l,
 ;; and n is the number of times it occurs in l.
 ;; The kind of dictionary can be controlled with the `make-dict' argument.
-(define (occurrences l #:make-dict [make-dict make-hash])
-  (define h (make-dict))
-  (for-each (λ(x)(dict:dict-update! h x add1 0)) l)
-  h)
+(define (occurrences l [d (make-hash)])
+  (if (dict:dict-mutable? d)
+      (begin (for-each (λ(x)(dict:dict-update! d x add1 0)) l)
+             d)
+      (for/fold ([d d])
+                ([x (in-list l)])
+        (dict:dict-update d x add1 0))))
 
 (module+ test
-  (check-equal? (occurrences '(a b a c c d a) #:make-dict make-massoc-dict)
-                (massoc '((a . 3) (b . 1) (c . 2) (d . 1)))))
+  (let ([l '(a b a c c d a)]
+        [res '((a . 3) (b . 1) (c . 2) (d . 1))])
+    (check-equal? (massoc->list (occurrences l (make-massoc)))
+                  res)
+  (check-equal? (occurrences l '())
+                res)))
+
