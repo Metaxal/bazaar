@@ -15,6 +15,7 @@
 
 ;; A mutable assoc-list dictionary
 ;; (keeps ordering of the elements)
+;; Actually just a boxed immutable assoc-list
 (struct massoc (v)
   #:transparent
   #:mutable
@@ -39,20 +40,16 @@
      (dict:dict-count (massoc-v dict) #:default x))
    
    (define (dict-iterate-first dict)
-     0
-     ; I don't understand why this returns #<assoc-iter> for assoc lists...
-     #;(dict:dict-iterate-first (massoc-v dict)))
+     (dict:dict-iterate-first (massoc-v dict)))
    
    (define (dict-iterate-next dict pos)
-     (and (< (add1 pos) (length (massoc-v dict)))
-          (add1 pos))
-     #;(dict:dict-iterate-next (massoc-v dict) pos))
+     (dict:dict-iterate-next (massoc-v dict) pos))
    
    (define (dict-iterate-key dict pos)
-     (car (list-ref (massoc-v dict) pos)))
+     (dict:dict-iterate-key (massoc-v dict) pos))
    
    (define (dict-iterate-value dict pos)
-     (cdr (list-ref (massoc-v dict) pos)))
+     (dict:dict-iterate-value (massoc-v dict) pos))
    ])
 
 (module+ test 
