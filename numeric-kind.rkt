@@ -25,6 +25,9 @@
                        kind
                        (dict-ref op-dict '$kind))))))
 
+(define (flprod l)
+  (apply fl* l))
+
 ;; In case we receive a float, convert it.
 (define (fx x)
   (fl->fx (fl x)))
@@ -32,23 +35,37 @@
 (define (unsafe-fx x)
   (unsafe-fl->fx (fl x)))
 
+(define (NOOP . l)
+  (error "Operator not implemented"))
+
+(define (lgnum? x)
+  (and (flonum? x)
+       (flprobability? x #t)))
+
+;; WARNING: How not to exponentiate y?
+(define (lgexpt x y)
+  (* (exp y) x))
+
 (define op-dict
   (list
-   (list '$kind  'real   'fixnum     'flonum  'extflonum      'bigfloat         'unsafe-fixnum     'unsafe-flonum  'unsafe-extflonum) ; $kind holds the symbolic kind
-   (list '$?     real?   fixnum?     flonum?  extflonum?      bigfloat?         fixnum?            flonum?         extflonum?)
-   (list '$      values  fx          fl       real->extfl     bf                unsafe-fx          fl              real->extfl) ; real->$
-   (list '$->    values  fx->fl      values   extfl->inexact  bigfloat->flonum  unsafe-fx->fl      values          extfl->inexact) ; $->real
-   (list '$+     +       fx+         fl+      extfl+          bf+               unsafe-fx+         unsafe-fl+      unsafe-extfl+)
-   (list '$-     -       fx-         fl-      extfl-          bf-               unsafe-fx-         unsafe-fl-      unsafe-extfl-)
-   (list '$*     *       fx*         fl*      extfl*          bf*               unsafe-fx*         unsafe-fl*      unsafe-extfl*)
-   (list '$/     /       fxquotient  fl/      extfl/          bf/               unsafe-fxquotient  unsafe-fl/      unsafe-extfl/)
-   (list '$=     =       fx=         fl=      extfl=          bf=               unsafe-fx=         unsafe-fl=      unsafe-extfl=)
-   (list '$>     >       fx>         fl>      extfl>          bf>               unsafe-fx>         unsafe-fl>      unsafe-extfl>)
-   (list '$<     <       fx<         fl<      extfl<          bf<               unsafe-fx<         unsafe-fl<      unsafe-extfl<)
-   (list '$>=    >=      fx>=        fl>=     extfl>=         bf>=              unsafe-fx>=        unsafe-fl>=     unsafe-extfl>=)
-   (list '$<=    <=      fx<=        fl<=     extfl<=         bf<=              unsafe-fx<=        unsafe-fl<=     unsafe-extfl<=)
-   (list '$abs   abs     fxabs       flabs    extflabs        bfabs             unsafe-fxabs       unsafe-flabs    unsafe-extflabs)
-   (list '$min   min     fxmin       flmin    extflmin        bfmin             unsafe-fxmin       unsafe-flmin    unsafe-extflmin)
+   (list '$kind  'real   'fixnum     'flonum  'extflonum      'bigfloat         'unsafe-fixnum     'unsafe-flonum  'unsafe-extflonum  'lgnum) ; $kind holds the symbolic kind
+   (list '$?     real?   fixnum?     flonum?  extflonum?      bigfloat?         fixnum?            flonum?         extflonum?         lgnum?)
+   (list '$      values  fx          fl       real->extfl     bf                unsafe-fx          fl              real->extfl        log) ; real->$
+   (list '$->    values  fx->fl      values   extfl->inexact  bigfloat->real    unsafe-fx->fl      values          extfl->inexact     exp) ; $->real
+   (list '$+     +       fx+         fl+      extfl+          bf+               unsafe-fx+         unsafe-fl+      unsafe-extfl+      lg+)
+   (list '$-     -       fx-         fl-      extfl-          bf-               unsafe-fx-         unsafe-fl-      unsafe-extfl-      lg-)
+   (list '$*     *       fx*         fl*      extfl*          bf*               unsafe-fx*         unsafe-fl*      unsafe-extfl*      lg*)
+   (list '$/     /       fxquotient  fl/      extfl/          bf/               unsafe-fxquotient  unsafe-fl/      unsafe-extfl/      lg/)
+   (list '$=     =       fx=         fl=      extfl=          bf=               unsafe-fx=         unsafe-fl=      unsafe-extfl=      =)
+   (list '$>     >       fx>         fl>      extfl>          bf>               unsafe-fx>         unsafe-fl>      unsafe-extfl>      >)
+   (list '$<     <       fx<         fl<      extfl<          bf<               unsafe-fx<         unsafe-fl<      unsafe-extfl<      <)
+   (list '$>=    >=      fx>=        fl>=     extfl>=         bf>=              unsafe-fx>=        unsafe-fl>=     unsafe-extfl>=     >=)
+   (list '$<=    <=      fx<=        fl<=     extfl<=         bf<=              unsafe-fx<=        unsafe-fl<=     unsafe-extfl<=     >=)
+   (list '$abs   abs     fxabs       flabs    extflabs        bfabs             unsafe-fxabs       unsafe-flabs    unsafe-extflabs    NOOP)
+   (list '$min   min     fxmin       flmin    extflmin        bfmin             unsafe-fxmin       unsafe-flmin    unsafe-extflmin    min)
+   (list '$max   max     fxmax       flmax    extflmax        bfmax             unsafe-fxmax       unsafe-flmax    unsafe-extflmax    max)
+   (list '$sum   NOOP    NOOP        flsum    NOOP            NOOP              NOOP               NOOP            NOOP               lgsum)
+   (list '$prod  NOOP    NOOP        flprod   NOOP            NOOP              NOOP               NOOP            NOOP               lgprod)
    ; to complete...
    ))
 
@@ -67,6 +84,7 @@
     (unsafe-fixnum unsafe-fx)
     (unsafe-flonum unsafe-fl)
     (unsafe-extflonum unsafe-extfl)
+    (lgnum log-flonum)
     ))
 
 (define (numeric-kind-index kind)
@@ -111,7 +129,8 @@
                    ($ 4)))
      (check-pred $? n)
      (check $= n ($ -20))))
-  (for ([kind (existing-numeric-kinds)])
+  (for ([kind (remove* '(lgnum)
+                       (existing-numeric-kinds))])
     (test-kind kind))
 
   (check-equal?
@@ -119,6 +138,14 @@
     'bigfloat ($ $+)
     ($+ ($ 3) ($ 4)))
    (bf 7))
+  
+  
+  (for ([kind '(flonum lgnum)])
+    (with-numeric-kind 
+     kind ($+ $ $->)
+     (check-= ($-> ($+ ($ .23) ($ .42)))
+              .65
+              1e-5)))
 
   )
 
@@ -126,3 +153,4 @@
 ;; - Can modify the '$' prefix? (something like '_' can be more readable sometimes)
 ;;   (also to avoid collision with other modules)
 ;; - define-numeric-kind to avoid the indentation shift ?
+;; - add log-space arithmetics?
