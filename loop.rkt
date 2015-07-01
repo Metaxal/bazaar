@@ -22,6 +22,22 @@
 
 (define no-elt (gensym 'no-elt))
 
+
+;; for/fold is very often used with define-values
+(define-syntax-rule (for/fold/define ([x a] ...) (y ...) body ...)
+  (define-values (x ...)
+    (for/fold ([x a] ...) (y ...)
+      body ...)))
+
+#; ; Ex:
+(begin
+  (for/fold/define 
+   ([l '()] [sum 0])
+   ([i 10])
+   (define r (random 1000))
+   (values (cons (list i r) l) (+ sum r)))
+  (list l sum))
+
 ;; Like for, but returns the best element and its value when elements are compared with <?
 ;; Each iteration must return the current element and its value (in this order).
 (define-syntax-rule (for/best <? (bindings ...) body ...)
@@ -58,4 +74,3 @@
               (define y (- 3 x))
               (values x y))))
   )
-
