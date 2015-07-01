@@ -5,7 +5,9 @@
 (require (for-syntax syntax/parse
                      racket/base))
 
-(provide debug-var
+(provide debug-vars
+         debug-vars/line
+         debug-vars/loc
          debug-expr
          info-str
          ok
@@ -23,9 +25,29 @@
 (define-syntax debug-var
   (syntax-parser 
    [(_ var:id)
+    #'(printf "~a=~v\n" 'var var)]))
+
+(define-syntax debug-var/line
+  (syntax-parser 
+   [(_ var:id)
+    (with-syntax ([line (syntax-line #'var)])
+      #'(printf "~a: ~a=~v\n" line 'var var))]))
+
+(define-syntax debug-var/loc
+  (syntax-parser 
+   [(_ var:id)
     (with-syntax ([line (syntax-line #'var)]
                   [pth (syntax-source-path-string #'var)])
       #'(printf "~a:~a ~a=~v\n" pth line 'var var))]))
+
+(define-syntax-rule (debug-vars var ...)
+  (begin (debug-var var) ...))
+
+(define-syntax-rule (debug-vars/line var ...)
+  (begin (debug-var/line var) ...))
+
+(define-syntax-rule (debug-vars/loc var ...)
+  (begin (debug-var/loc var) ...))
 
 ;; Surround an expr with this procedure to output 
 ;; its value transparently
