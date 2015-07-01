@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require plot)
+(require plot
+         racket/dict)
 
 (provide (all-defined-out)
          (all-from-out plot))
@@ -31,6 +32,16 @@
   (check-equal?
    (list->points '(a b c) 2)
    '((2 a) (3 b) (4 c))))
+
+(define (dict-histogram d)
+  (discrete-histogram
+   (for/list ([(k v) (in-dict d)])
+     (vector k v))))
+
+#; ; Ex:
+(plot
+   (dict-histogram
+   '((a . 10) (b . 20) (c . 12))))
 
 (define-syntax-rule (with-x-log-transform body ...)
   (parameterize ([plot-x-transform log-transform]
