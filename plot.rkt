@@ -9,9 +9,24 @@
 (module+ test
   (require rackunit))
 
-(define (build-points f a b [inc 1])
+;; Warning: Contrary to build-list, it starts at 1 and ends at n (not n-1)
+(define (build-points f a [b #f] [inc 1])
+  (let ([a (if b a 1)]
+        [b (if b b a)])
     (for/list ([i (in-range a (+ b 1) inc)])
-      (list i (f i))))
+      (list i (f i)))))
+
+(module+ test
+  (require racket/math)
+  (check-equal? (build-points sqr 4)
+                '((1 1) (2 4) (3 9) (4 16)))
+  (check-equal? (build-points sqr 2 4)
+                '((2 4) (3 9) (4 16)))
+  (check-equal? (build-points sqr 1 4 2)
+                '((1 1) (3 9)))
+  (check-equal? (build-points sqr 4 #f 2)
+                '((1 1) (3 9)))
+  )
 
 ;; Useful for calls like:
 #;(plot (lines (build-points f 15 45)))
