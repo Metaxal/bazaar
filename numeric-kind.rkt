@@ -84,7 +84,7 @@
     (unsafe-fixnum unsafe-fx)
     (unsafe-flonum unsafe-fl)
     (unsafe-extflonum unsafe-extfl)
-    (lgnum log-flonum)
+    (lgnum lognum log-flonum lg)
     ))
 
 (define (numeric-kind-index kind)
