@@ -43,6 +43,7 @@
        (flprobability? x #t)))
 
 ;; WARNING: How not to exponentiate y?
+#;
 (define (lgexpt x y)
   (* (exp y) x))
 
@@ -66,6 +67,10 @@
    (list '$max   max     fxmax       flmax    extflmax        bfmax           unsafe-fxmax       unsafe-flmax    unsafe-extflmax    max)
    (list '$sum   NOOP    NOOP        flsum    NOOP            NOOP            NOOP               NOOP            NOOP               lgsum)
    (list '$prod  NOOP    NOOP        flprod   NOOP            NOOP            NOOP               NOOP            NOOP               lgprod)
+   (list '$exp   exp     NOOP        flexp    extflexp        bfexp           NOOP               unsafe-flexp    unsafe-extflexp    NOOP)
+   (list '$exp2  NOOP    NOOP        flexp2   NOOP            bfexp2          NOOP               NOOP            NOOP               NOOP)
+   (list '$log   log     NOOP        fllog    extfllog        bflog           NOOP               unsafe-fllog    unsafe-extfllog    NOOP)
+   (list '$log2  NOOP    NOOP        fllog2   NOOP            bflog2          NOOP               NOOP            NOOP               NOOP)
    ; to complete...
    ))
 
@@ -153,4 +158,3 @@
 ;; - Can modify the '$' prefix? (something like '_' can be more readable sometimes)
 ;;   (also to avoid collision with other modules)
 ;; - define-numeric-kind to avoid the indentation shift ?
-;; - add log-space arithmetics?
