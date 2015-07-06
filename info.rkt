@@ -1,16 +1,17 @@
 #lang setup/infotab
 
 (define deps
- '("math-lib"
-   "base"
+ '("base"
    "draw-lib"
    "gui-lib"
    "images"
+   "math-lib"
+   "net-lib"
+   "plot-gui-lib"
    "racket-index"
    "rackunit-lib"
    "scribble-lib"
    "slideshow-lib"
    "srfi-lite-lib"
-   "net-lib"
    ))
 
