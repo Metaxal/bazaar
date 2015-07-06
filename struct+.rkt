@@ -19,11 +19,13 @@
        (with-syntax ([getter (format-id #'struct-id "~a-~a" struct-sym field-sym)]
                      [setter (format-id #'struct-id "set-~a-~a!" struct-sym field-sym)]
                      [setter+ (format-id #'struct-id "~a-~a!" struct-sym field-sym)]
-                     [updater (format-id #'struct-id "~a-~a!!" struct-sym field-sym)])
+                     [updater (format-id #'struct-id "update-~a-~a!" struct-sym field-sym)]
+                     [updater+ (format-id #'struct-id "~a-~a!!" struct-sym field-sym)])
        #'(begin
            (define setter+ setter)
            (define (updater stru f)
-             (setter stru (f (getter stru)))))))]))
+             (setter stru (f (getter stru))))
+           (define updater+ updater))))]))
 
 ;; Like `struct` but with more options
 ;; - If the #:mutable+ keyword is found, it is replaced with #:mutable,
@@ -65,7 +67,8 @@
     (plop-x! p 5)
     (check-eqv? (plop-x p) 5)
     (plop-y!! p sub1)
-    (check-eqv? (plop-y p) 19))
+    (update-plop-y! p sub1)
+    (check-eqv? (plop-y p) 18))
   
   (let ([p (plop/kw #:x 3 #:z 4)])
     (check-equal? (list (plop-x p) (plop-y p) (plop-z p))
