@@ -7,6 +7,7 @@
    "images"
    "math-lib"
    "net-lib"
+   "plot-lib"
    "plot-gui-lib"
    "racket-index"
    "rackunit-lib"

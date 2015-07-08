@@ -84,7 +84,8 @@
 
 ;; Returns a dictionary of (e . n) where e is an element of l,
 ;; and n is the number of times it occurs in l.
-;; The kind of dictionary can be controlled with the `make-dict' argument.
+;; The kind of dictionary can be controlled with the optional argument.
+;; See also `samples->hash` and `count-samples` from math/statistics.
 (define (occurrences l [d (make-hash)])
   (if (dict:dict-mutable? d)
       (begin (for-each (λ(x)(dict:dict-update! d x add1 0)) l)

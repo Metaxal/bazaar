@@ -33,6 +33,7 @@
 ;; (Does not yet handle parent arguments properly, nor per-field mutation.)
 ;; - The #:make/kw creates a `id`/kw constructor that takes keyword arguments.
 ;; http://www.greghendershott.com/2015/07/keyword-structs-revisited.html
+;; Warning: For now, the optional arguments syntax is supported only with #:make/kw
 (define-syntax (struct+ stx)
   (define-syntax-class field
     (pattern id:id
