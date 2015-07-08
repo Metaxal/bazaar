@@ -1,7 +1,8 @@
 #lang setup/infotab
 
 (define deps
- '("base"
+ '("math-lib"
+   "base"
    "draw-lib"
    "gui-lib"
    "images"
