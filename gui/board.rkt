@@ -13,38 +13,16 @@
          board-cell-pic
          board-draw-cell-pic
          board-set-palette
-         red-palette
          no-pen
-         black-pen
-         blue-pen
-         red-pen
-         no-brush
          board-ref
          board-set!
+         board-update!
          board-ref-canvas
          board-get-matrix
          board-set-matrix
          )
 
-#| MVC
-
-To make a real separation between graphics and model,
-the initialization should take a matrix as argument.
--> init the matrix and the gui separately.
-
-But we can provide one in case none is provided?
-
-|#
-
-
-
-(define no-pen     (make-object pen% "BLACK" 1 'transparent))
-(define black-pen  (make-object pen% "BLACK" 1 'solid))
-(define red-pen    (make-object pen% "RED" 1 'solid))
-(define blue-pen   (make-object pen% "BLUE" 1 'solid))
-
-(define no-brush (make-object brush% "white" 'transparent))
-;(define blue-brush (make-object brush% "blue" 'solid))
+(define no-pen (make-object pen% "BLACK" 1 'transparent))
 
 (define board%
   (class canvas%
@@ -79,8 +57,8 @@ But we can provide one in case none is provided?
                [min-height total-size-y]
                [style (append style '(no-autoclear))]
                [paint-callback 
-                (λ(canvas dc)(send (super get-dc) draw-bitmap off-bitmap 0 0)
-                  )])
+                (λ(canvas dc)
+                  (send (super get-dc) draw-bitmap off-bitmap 0 0))])
         
     (set-matrix mat)
 
@@ -97,8 +75,7 @@ But we can provide one in case none is provided?
       (set! total-size-x (- (* num-cell-x cell-size-x) inter-cell-dx))
       (set! total-size-y (- (* num-cell-y cell-size-y) inter-cell-dy))
       (min-width total-size-x)
-      (min-height total-size-y)
-      )
+      (min-height total-size-y))
     
     (define/public (get-total-size-x) total-size-x)
     (define/public (get-total-size-y) total-size-y)
@@ -156,9 +133,7 @@ But we can provide one in case none is provided?
              ; C'est ca qui prend du temps !!
              (send off-bitmap-dc draw-bitmap pic
                    (* j cell-size-x)
-                   (* i cell-size-y))))
-         ;(void)
-         )))
+                   (* i cell-size-y)))))))
     
     (define saved-background #f)
     
@@ -170,9 +145,7 @@ But we can provide one in case none is provided?
       (draw-background)
       (draw-other (get-dc))
       (refresh)
-      (set! saved-background #f)
-      )
-    
+      (set! saved-background #f))
     
     ;; does not modify the background image, 
     ;; just draws something over it
@@ -188,8 +161,7 @@ But we can provide one in case none is provided?
       (send off-bitmap-dc draw-bitmap
             saved-background 0 0)
       (proc (get-dc))
-      (refresh)
-      )
+      (refresh))
     
     (define/override (on-event evt)
       (let* ([x (send evt get-x)]
@@ -212,22 +184,21 @@ But we can provide one in case none is provided?
                 ;['enter       (on-mouse-enter x y)]
                 ;['leave       (on-mouse-leave x y)]
                 [else (void)]
-                )))
-        ))
+                )))))
     
     (define/override (on-char ch)
       (on-char-ext ch))
-    
+
     ))
 
+;; Same as board-draw/proc, but as a more convenient macro
 (define-syntax-rule (board-draw board ms body ...)
   (begin 
     ; condition d'arrêt ?
     (send board draw-background)
     body ...  
     (send board refresh)
-    (sleep/yield ms)
-    ))
+    (sleep/yield ms)))
 
 (define (board-cell-pic board proc)
   (send board set-cell-pic proc))
@@ -242,10 +213,6 @@ But we can provide one in case none is provided?
           (λ(i j v)(vector-ref pal v)))))
 ; ex: (board-set-palette board red-palette)
 
-(define red-palette
-  (build-vector 256 (λ(n)(list n 0 0))))
-
-
 (define (board-make-cell-pic board color)
   (send board make-cell-pic color))
 
@@ -259,6 +226,10 @@ But we can provide one in case none is provided?
 
 (define (board-set! board x y v)
   (matrix-set! (send board get-matrix) y x v))
+
+;; updater : any/c -> any/c
+(define (board-update! board x y updater)
+  (board-set! board x y (updater (board-ref board x y))))
 
 (define (board-draw-cell-pic board x y pic)
   (send board draw-cell-pict x y pic))
