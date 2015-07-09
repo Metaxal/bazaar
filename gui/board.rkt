@@ -239,38 +239,3 @@
 
 (define (board-set-matrix board mat)
   (send board set-matrix mat))
-
-; une board-loop
-; qui commence par effacer le board
-; affcihe les cases
-; laisse à l'utilisateur d'ajouter des choses (images) par dessus
-; puis copie le bitmap à l'écran
-
-;;; TEST:
-(module+ main
-  (define frame1 (new frame% [label "PLop"]))
-  (define board1 (new board%
-                      [parent frame1]
-                      [num-cell-x 10] 
-                      [cell-dx 48] 
-                      [inter-cell-dx 1]))
-  (send board1 set-cell-pic 
-        (let([red (send board1 make-cell-pic "red")]
-             [blue (send board1 make-cell-pic "blue")]) 
-          (λ(i j v)(if (= 1 v) red blue))));'none))))
-  
-  (send frame1 show #t)
-  (send board1 draw)
-  ;
-  ;;(sleep/yield 1)
-  ;(define mat1 (send board1 get-matrix))
-  ;
-  ;(time
-  ;(let loop ([i 0])
-  ;  (when (< i 100)
-  ;    (matrix-map! mat1 (λ(i j v)(random 2)))
-  ;    (send board1 on-paint)
-  ;;    (send board1 refresh)
-  ;    (sleep/yield 0.01)
-  ;    (loop (+ i 1)))))
-  )
