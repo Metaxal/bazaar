@@ -50,8 +50,8 @@
 
     (define cell-size-x (+ cell-dx inter-cell-dx))
     (define cell-size-y (+ cell-dy inter-cell-dy))
-    (define total-size-x 0);(* num-cell-x cell-size-x))
-    (define total-size-y 0);(* num-cell-y cell-size-y))
+    (define total-size-x 0)
+    (define total-size-y 0)
 
     (super-new [min-width total-size-x]
                [min-height total-size-y]
@@ -130,7 +130,7 @@
        (λ(i j v)
          (let ([pic (cell-pic i j v)])
            (unless (symbol? pic)
-             ; C'est ca qui prend du temps !!
+             ; This takes time
              (send off-bitmap-dc draw-bitmap pic
                    (* j cell-size-x)
                    (* i cell-size-y)))))))
@@ -142,17 +142,16 @@
     ;; Should take another parameter for drawing the cells?
     ;; (instead of putting it somewhere weird?)
     (define/public (draw [draw-other (λ(dc)(void))])
-      (draw-background)
+      (draw-background) ; i.e., the cells
       (draw-other (get-dc))
       (refresh)
       (set! saved-background #f))
     
-    ;; does not modify the background image, 
-    ;; just draws something over it
+    ;; does not modify the background image, just draws something over it.
+    ;; This allows for faster drawing in case the background doesn't change often.
     (define/public (draw-over proc)
       (unless saved-background
         ; if the background has changed since last time, re-save it
-        ;(printf "re-save background\n")
         (set! saved-background (make-object bitmap% total-size-x total-size-y))
         (let ([saved-dc (make-object bitmap-dc% saved-background)])
           (send saved-dc draw-bitmap off-bitmap 0 0)
@@ -166,8 +165,8 @@
     (define/override (on-event evt)
       (let* ([x (send evt get-x)]
              [y (send evt get-y)]
-             [xc (x->xc x)];(quotient x cell-size-x)]
-             [yc (y->yc y)];(quotient y cell-size-y)]
+             [xc (x->xc x)]
+             [yc (y->yc y)]
              [evt-type (send evt get-event-type)]
              )
         (when (and (>= xc 0) (< xc num-cell-x) (>= yc 0) (< yc num-cell-y))
