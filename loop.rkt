@@ -24,7 +24,7 @@
 
 
 ;; for/fold is very often used with define-values
-(define-syntax-rule (for/fold/define ([x a] ...) (y ...) body ...)
+(define-syntax-rule (define/for/fold ([x a] ...) (y ...) body ...)
   (define-values (x ...)
     (for/fold ([x a] ...) (y ...)
       body ...)))
