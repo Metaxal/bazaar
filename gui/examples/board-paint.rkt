@@ -19,8 +19,8 @@
 
 (send board1 set-cell-pic 
       ; create pictures the size of a cell of a given color
-      (let([red   (send board1 make-cell-pic "red")]
-           [blue  (send board1 make-cell-pic "blue")]) 
+      (let([red  (send board1 make-cell-pic "red")]
+           [blue (send board1 make-cell-pic "blue")]) 
         ; decide what cells to show at place (i, j) of value v
         (λ(i j v)
           (case v

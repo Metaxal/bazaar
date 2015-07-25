@@ -17,6 +17,7 @@
          board-ref
          board-set!
          board-update!
+         board-map!
          board-ref-canvas
          board-get-matrix
          board-set-matrix
@@ -97,14 +98,15 @@
       ;: for the current board.
       ;: Should be called only once for each different cell type,
       ;: i.e. at initialization time, not at runtime.
-      (let* ([bm (make-object bitmap% cell-dx cell-dy)]
+      (let* ([bm (send this make-bitmap cell-dx cell-dy)]
              [bm-dc (new bitmap-dc% [bitmap bm])])
         (send bm-dc set-pen no-pen)
-        (send bm-dc set-brush (make-object brush% color 'solid))
+        (send bm-dc set-brush color 'solid)
         (send bm-dc draw-rectangle 0 0 cell-dx cell-dy)
         (send bm-dc set-bitmap #f)
         bm))
-    (define cell-pic 
+    
+    (define cell-pic
       (if (and (> cell-dx 0) (> cell-dy 0))
           (let ([c (make-cell-pic "blue")]) (λ(v)c))
           (λ(v)(make-object bitmap% 1 1)) ; ?????? how to make a "null" image ??????
@@ -129,11 +131,16 @@
        mat 
        (λ(i j v)
          (let ([pic (cell-pic i j v)])
-           (unless (symbol? pic)
-             ; This takes time
-             (send off-bitmap-dc draw-bitmap pic
-                   (* j cell-size-x)
-                   (* i cell-size-y)))))))
+           (cond [(string? pic)
+                  (send off-bitmap-dc set-pen no-pen)
+                  (send off-bitmap-dc set-brush pic 'solid)
+                  (send off-bitmap-dc draw-rectangle
+                        (* j cell-size-x) (* i cell-size-y)
+                        cell-size-x cell-size-y)]
+                 [(symbol? pic) (void)]
+                 [else 
+                  (send off-bitmap-dc draw-bitmap pic
+                        (* j cell-size-x) (* i cell-size-y))])))))
     
     (define saved-background #f)
     
@@ -147,7 +154,8 @@
       (refresh)
       (set! saved-background #f))
     
-    ;; does not modify the background image, just draws something over it.
+    ;; Use `draw-over` instead of `draw` when the board does not change 
+    ;; often, and only drawing something over it is required.
     ;; This allows for faster drawing in case the background doesn't change often.
     (define/public (draw-over proc)
       (unless saved-background
@@ -230,6 +238,12 @@
 (define (board-update! board x y updater)
   (board-set! board x y (updater (board-ref board x y))))
 
+(define (board-map! board updater)
+  (define mat (send board get-matrix))
+  (matrix-map!
+       mat 
+       (λ(i j v)(updater j i v))))
+
 (define (board-draw-cell-pic board x y pic)
   (send board draw-cell-pict x y pic))
 
@@ -238,3 +252,12 @@
 
 (define (board-set-matrix board mat)
   (send board set-matrix mat))
+
+;; Optimizations:
+;; - We could keep track of the list of cells have been changed (with board-set)
+;; since last display
+;; and redraw only the cells on the background image that have changed.
+;; (use a init flag, default to #f)
+
+
+
