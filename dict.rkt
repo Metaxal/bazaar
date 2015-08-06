@@ -2,7 +2,9 @@
 ;;; Copyright (C) Laurent Orseau, 2010-2013
 ;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
-(require (prefix-in dict: racket/dict))
+(require (prefix-in dict: racket/dict)
+         racket/format
+         racket/string)
 
 (provide make-massoc
          massoc
@@ -101,4 +103,38 @@
                   res)
   (check-equal? (occurrences l '())
                 res)))
+
+(define (assoc-nice-print ass)
+  (define w (apply max (map (λ(p)(string-length (~a (car p)))) ass)))
+  (displayln
+   (string-join
+    #:before-first "'("
+    (for/list ([p ass])
+      (string-append
+       "(" (~a (car p) #:min-width w #:pad-string " ")
+       " . " (~a (cdr p)) ")"))
+    "\n  "
+    #:after-last ")")))
+
+
+#;
+(assoc-nice-print
+ '((aphabet-size . 90)
+  (mixture-log-prob . -17095.10259010989)
+  (mixture-log2-prob . -24663.019730239615)
+  (mixture-bytes . 3082.877466279952)
+  (file-length . 11150)
+  (bits-per-byte . 2.2119300206492927)
+  (nb-models . 38413)
+  (ctx-length-max . 10)))
+; ->
+#;
+'((aphabet-size      . 90)
+  (mixture-log-prob  . -17095.10259010989)
+  (mixture-log2-prob . -24663.019730239615)
+  (mixture-bytes     . 3082.877466279952)
+  (file-length       . 11150)
+  (bits-per-byte     . 2.2119300206492927)
+  (nb-models         . 38413)
+  (ctx-length-max    . 10))
 
