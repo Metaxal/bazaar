@@ -36,6 +36,7 @@
 ;;; These should be in values.rkt instead
 
 ;; Return the multiple values of proc-call as a list
+;; See also values->list in "values.rkt"
 (define-syntax-rule (call/values->list expr)
   (call-with-values (λ()expr) (λ l l)))
 ; Example:
