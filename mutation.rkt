@@ -13,11 +13,11 @@
 (define-simple-macro (-- var:id)
   (set! var (sub1 var)))
 
-(define-simple-macro (+= var:id n)
-  (set! var (+ var n)))
+(define-simple-macro (+= var:id n:expr ...)
+  (set! var (+ var n ...)))
 
-(define-simple-macro (-= var:id n)
-  (set! var (- var n)))
+(define-simple-macro (-= var:id n:expr ...)
+  (set! var (- var n ...)))
 
 (define-simple-macro (cons! val:expr var:id)
   (set! var (cons val var)))
@@ -25,8 +25,8 @@
 (define-simple-macro (rest! var:id)
   (set! var (rest var)))
 
-(define-simple-macro (append! l:id l2)
-  (set! l (append l l2)))
+(define-simple-macro (append! l:id l2:expr ...)
+  (set! l (append l l2 ...)))
 
 (define-simple-macro (append2! l:id l2)
   (set! l2 (append l l2)))
