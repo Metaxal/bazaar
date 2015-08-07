@@ -10,7 +10,8 @@
          massoc
          massoc->list
          dict-transpose
-         occurrences)
+         occurrences
+         assoc-nice-print)
 
 (module+ test 
   (require rackunit))

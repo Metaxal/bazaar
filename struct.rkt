@@ -3,7 +3,9 @@
 (require (for-syntax racket/syntax
                      syntax/parse))
 
-(provide struct+)
+(provide struct+
+         call
+         call/apply)
 
 (module+ test
   (require rackunit))
