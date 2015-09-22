@@ -11,7 +11,9 @@
          massoc->list
          dict-transpose
          occurrences
-         assoc-nice-print)
+         assoc-nice-print
+         assoc-nice-write
+         assoc-nice-display)
 
 (module+ test 
   (require rackunit))
@@ -105,17 +107,21 @@
   (check-equal? (occurrences l '())
                 res)))
 
-(define (assoc-nice-print ass)
+(define ((assoc-nice-output ~out) ass)
   (define w (apply max (map (λ(p)(string-length (~a (car p)))) ass)))
-  (displayln
+  (displayln 
    (string-join
     #:before-first "'("
     (for/list ([p ass])
       (string-append
        "(" (~a (car p) #:min-width w #:pad-string " ")
-       " . " (~a (cdr p)) ")"))
+       " . " (~out (cdr p)) ")"))
     "\n  "
     #:after-last ")")))
+
+(define assoc-nice-print   (assoc-nice-output ~v))
+(define assoc-nice-write   (assoc-nice-output ~s))
+(define assoc-nice-display (assoc-nice-output ~a))
 
 
 #;
