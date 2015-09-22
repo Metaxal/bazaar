@@ -20,8 +20,9 @@
       (apply map list ll)))
 
 (module+ test
-  (check-equal? (transpose '((a b c) (1 2 3)))
-                '((a 1) (b 2) (c 3))))
+  (check-equal? (transpose '()) '())
+  (check-equal? (transpose '((a b c) (1 2 3) (d e f)))
+                '((a 1 d) (b 2 e) (c 3 f))))
 
 (define (consr x l)
   (append l (list x)))
