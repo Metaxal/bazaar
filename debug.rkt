@@ -9,6 +9,8 @@
          debug-vars/line
          debug-vars/loc
          debug-expr
+         vars->assoc
+         expr->expr+symbol
          info-str
          ok
          time*
@@ -25,20 +27,20 @@
 (define-syntax debug-var
   (syntax-parser 
    [(_ var:id)
-    #'(printf "~a=~v\n" 'var var)]))
+    #'(printf "~a = ~v\n" 'var var)]))
 
 (define-syntax debug-var/line
   (syntax-parser 
    [(_ var:id)
     (with-syntax ([line (syntax-line #'var)])
-      #'(printf "~a: ~a=~v\n" line 'var var))]))
+      #'(printf "~a: ~a = ~v\n" line 'var var))]))
 
 (define-syntax debug-var/loc
   (syntax-parser 
    [(_ var:id)
     (with-syntax ([line (syntax-line #'var)]
                   [pth (syntax-source-path-string #'var)])
-      #'(printf "~a:~a ~a=~v\n" pth line 'var var))]))
+      #'(printf "~a:~a ~a = ~v\n" pth line 'var var))]))
 
 (define-syntax-rule (debug-vars var ...)
   (begin (debug-var var) ...))
@@ -48,6 +50,13 @@
 
 (define-syntax-rule (debug-vars/loc var ...)
   (begin (debug-var/loc var) ...))
+
+(define-syntax-rule (vars->assoc var ...)
+  (list (cons 'var var) ...))
+
+;; Returns the value expression and the quoted expression
+(define-syntax-rule (expr->expr+symbol expr)
+  (values expr 'expr))
 
 ;; Surround an expr with this procedure to output 
 ;; its value transparently
