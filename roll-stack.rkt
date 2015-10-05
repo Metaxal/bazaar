@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require racket/match)
+(require bazaar/struct)
 
 (provide (all-defined-out))
 
@@ -18,41 +18,74 @@
 ;; n : current number of elements
 ;; idx : current index of the head
 (struct roll-stack (nmax vec n idx)
+  #:prefab
   #:mutable
-  #:transparent)
+  #;#:transparent)
 
-(define (make-roll-stack nmax [default #f])
-  (roll-stack nmax (make-vector nmax default) nmax -1))
+(define (make-roll-stack nmax)
+  (roll-stack nmax (make-vector nmax #f) 0 -1))
 
 ;; Adds a new element to the head, possibly writing over an old one.
 (define (roll-stack-push! rs elt)
-  (match-define (roll-stack nmax vec n idx) rs)
-  (define new-idx (if (= n 0) 0 (modulo (+ idx 1) n)))
-  (vector-set! vec new-idx elt)
-  (set-roll-stack-idx! rs new-idx)
-  (when (< n nmax)
-    (set-roll-stack-n! rs (+ n 1))))
+  (with-struct
+   rs roll-stack (nmax n vec idx)
+   (define new-idx (if (= n 0) 0 (modulo (+ idx 1) nmax)))
+   (vector-set! vec new-idx elt)
+   (set-roll-stack-idx! rs new-idx)
+   (when (< n nmax)
+     (set-roll-stack-n! rs (+ n 1)))))
+
+(define (roll-stack-pop! rs)
+  (with-struct
+   rs roll-stack (n nmax idx)
+   (when (= 0 n)
+     (error "Cannot pop from empty roll-stack"))
+   (define elt (roll-stack-ref rs 0))
+   (set-roll-stack-idx! rs (modulo (- idx 1) nmax))
+   (set-roll-stack-n! rs (- n 1))
+   elt))
 
 ;; 0 is the head
 (define (roll-stack-ref rs pos)
-  (match-define (roll-stack nmax vec n idx) rs)
-  (define ref (modulo (- idx pos) n))
-  (vector-ref vec ref))
+  (with-struct
+   rs roll-stack (nmax vec n idx)
+   (define ref (modulo (- idx pos) nmax))
+   (vector-ref vec ref)))
+
+(define (roll-stack->list rs)
+  (for/list ([i (in-range (roll-stack-n rs))])
+    (roll-stack-ref rs i)))
+
+(define (roll-stack-fill! rs val)
+  (vector-fill! (roll-stack-vec rs) val)
+  (set-roll-stack-n! rs (roll-stack-nmax rs)))
 
 (module+ test
+  (require bazaar/debug
+           racket/list)
   (let* ([N 10]
          [rs (make-roll-stack N)]
-         [l (build-list 30 (λ(i)(random 100)))])
+         [l (build-list 30 (λ(i)(random 100)))]
+         [n-elt 0])
     (void
      (for/fold ([lrev '()])
-               ([e l]
-                [i (in-naturals)])
-       (when (> i 0)
-         (define idx (random (min i N)))
-         #;(debug-vars i idx lrev rs)
+               ([e l])
+       (when (> n-elt 0)
+         (define idx (random (min n-elt N)))
+         #;(debug-vars n-elt idx lrev rs)
+         #;(newline)
          (check =
                 (roll-stack-ref rs idx)
-                (list-ref lrev idx)))
+                (list-ref lrev idx))
+         (when (= 0 (random 10)) ; remove first element
+           (define elt (first lrev))
+           (set! lrev (rest lrev))
+           (set! n-elt (sub1 n-elt))
+           (define rs-elt (roll-stack-pop! rs))
+           (check-equal? elt rs-elt)))
+       (check-equal? (roll-stack->list rs)
+                     (take lrev (min n-elt N)))
        (roll-stack-push! rs e)
-       (cons e lrev)))
-    ))
+       (set! n-elt (min (add1 n-elt) N))
+       (cons e lrev))))
+  )
