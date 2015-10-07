@@ -5,7 +5,8 @@
 (require (for-syntax syntax/parse
                      racket/base))
 
-(provide debug-vars
+(provide debug-var
+         debug-vars
          debug-vars/line
          debug-vars/loc
          debug-expr
