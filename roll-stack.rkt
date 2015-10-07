@@ -11,7 +11,8 @@
 ;;; Fixed number N of elements
 ;;; Keeps the N last pushed elements
 ;;; O(1) push of the newest element
-;;; O(1) access time to any element
+;;; O(1) pop of the newest element
+;;; O(1) access time to any of the last N elements
 
 ;; nmax : max number of elements
 ;; vec : vector containing the elements
