@@ -4,6 +4,8 @@
                      syntax/parse))
 
 (provide struct+
+         with-struct
+         with-struct.id
          call
          call/apply)
 
@@ -102,6 +104,53 @@
                   '(3 6 4)))
   
   )
+
+(begin-for-syntax
+  (define-syntax-class id/maybe-rename
+    (pattern old-id:id
+             ;#:with old-id #'old-id
+             #:with new-id #'old-id)
+    (pattern [old-id:id new-id:id]
+             ;#:with old-id #'old-id
+             ;#:with new-id #'new-id*
+             )))
+
+;; Do a with-struct with let-like wrapping also?
+;; Or better, write struct-obj.val
+(define-syntax (with-struct stx)
+  (syntax-parse stx
+    [(_ struct-obj:expr struct-id:id (field:id/maybe-rename ...) body ...)
+     (with-syntax* ([(get-id ...) (map (λ(fid)(format-id #'struct-id "~a-~a" #'struct-id fid))
+                                       (syntax->list #'(field.old-id ...)))])
+       #'(let ([obj struct-obj])
+           (let ([field.new-id (get-id obj)] ...)
+             body ...)))]))
+
+(define-syntax (with-struct.id stx)
+  (syntax-parse stx
+    [(_ struct-obj-id:id struct-id:id (id:id ...) body ...)
+     (with-syntax* ([(get-id ...) (map (λ(fid)(format-id #'struct-id "~a-~a" #'struct-id fid))
+                                       (syntax->list #'(id ...)))]
+                    [(set-id ...) (map (λ(fid)(format-id #'struct-id "~a.~a" #'struct-obj-id fid))
+                                       (syntax->list #'(id ...)))])
+       #'(let ([set-id (get-id struct-obj-id)] ...)
+           body ...))]))
+
+
+(module+ test
+  (struct A (a b c))
+  
+  (define A1 (A 1 2 3))
+  
+  (check-equal?
+   (with-struct A1 A (a b [c d])
+                (list b d a))
+   '(2 3 1))
+  
+  (check-equal?
+   (with-struct.id A1 A (a b c)
+                  (list A1.b A1.c A1.a))
+   '(2 3 1)))
 
 ;; For struct objects, saves a name and a pair of parenthesis (for clarity)
 ;; Assumes the first argument to method is the object itself
