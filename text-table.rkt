@@ -2,13 +2,64 @@
 ;;; Copyright (C) Laurent Orseau, 2010-2013
 ;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
-(require srfi/13
+(require "loop.rkt"
+         (only-in srfi/13 string-pad-right)
+         racket/string
+         racket/list
+         racket/format
          racket/dict)
 
-(provide (all-defined-out))
+(provide (except-out (all-defined-out) ->string))
 
 (define (->string a)
   (format "~a" a))
+
+;; Simple table to string conversion, ensuring consistent column width
+;; See below for more complex ones.
+(define (table->string ll
+                       #:->string [->string ~a]
+                       #:col-sep [col-sep " "]
+                       #:row-sep [row-sep "\n"] ; either string or (λ(col-length)str-expr)
+                       #:align [align 'left]) ; like for ~a
+  (let* ([lens (map length ll)]
+         [len1 (first lens)])
+    (unless (andmap (λ(len)(= len len1)) (rest lens))
+      (error "All rows must have the same length")))
+  (define/for/fold ([cell-sizes (make-list (length (first ll)) 0)]
+                    [ll-str '()])
+                   ([row (in-list ll)])
+    (define/for/fold ([new-cell-sizes '()]
+                      [row-str '()])
+                     ([cell (in-list row)]
+                      [size (in-list cell-sizes)])
+      (define str (->string cell))
+      (values (cons (max (string-length str) size) new-cell-sizes)
+              (cons str row-str)))
+    (values (reverse new-cell-sizes)
+            (cons (reverse row-str) ll-str)))
+  (define rows-str
+    (map (λ(row-str)
+          (string-join (map (λ(str size)
+                              (~a str
+                                  #:min-width size
+                                  #:align align))
+                            row-str
+                            cell-sizes)
+                       col-sep))
+        (reverse ll-str)))
+  (string-join
+   rows-str
+   (if (procedure? row-sep)
+       (row-sep (string-length (first rows-str)))
+       row-sep)))
+
+;; Example
+#;
+(displayln
+   (table->string
+    '((123 456 77 54 1  5646547987 41 1)
+      (a b c d e f g h i))))
+
 
 ;;;;;;;;;;;;;;;;;;;;
 ;;; ASCII Tables ;;;
