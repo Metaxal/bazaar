@@ -10,6 +10,7 @@
          debug-vars/line
          debug-vars/loc
          debug-expr
+         assert
          vars->assoc
          expr->expr+symbol
          info-str
@@ -19,6 +20,9 @@
 
 ;;; See also Racket's log facility:
 ;;; http://docs.racket-lang.org/reference/logging.html
+
+(module+ test
+  (require rackunit))
 
 (begin-for-syntax
   (define (syntax-source-path-string stx)
@@ -58,6 +62,19 @@
 ;; Returns the value expression and the quoted expression
 (define-syntax-rule (expr->expr+symbol expr)
   (values expr 'expr))
+
+(define-syntax assert
+  (syntax-parser
+    [(_ expr:expr)
+     #'(unless expr
+         (error "Assertion failed:" 'expr))]
+    [(_ expr:expr ctx:expr ...)
+     #'(unless expr
+         (error "Assertion failed:" 'expr 'with-context: (debug-vars->list ctx ...)))]))
+
+(module+ test
+  (check-not-exn (λ()(assert (= 1 1))))
+  (check-exn exn:fail? (λ()(assert (= 1 2)))))
 
 ;; Surround an expr with this procedure to output 
 ;; its value transparently
