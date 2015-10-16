@@ -111,12 +111,12 @@
   (define w (apply max (map (λ(p)(string-length (~a (car p)))) ass)))
   (displayln 
    (string-join
-    #:before-first "'("
+    #:before-first "("
     (for/list ([p ass])
       (string-append
        "(" (~a (car p) #:min-width w #:pad-string " ")
        " . " (~out (cdr p)) ")"))
-    "\n  "
+    "\n "
     #:after-last ")")))
 
 (define assoc-nice-print   (assoc-nice-output ~v))
@@ -126,22 +126,24 @@
 
 #;
 (assoc-nice-print
- '((aphabet-size . 90)
-  (mixture-log-prob . -17095.10259010989)
-  (mixture-log2-prob . -24663.019730239615)
-  (mixture-bytes . 3082.877466279952)
-  (file-length . 11150)
-  (bits-per-byte . 2.2119300206492927)
-  (nb-models . 38413)
-  (ctx-length-max . 10)))
+ '((name . "Henry")
+   (aphabet-size . 90)
+   (mixture-log-prob . -17095.10259010989)
+   (mixture-log2-prob . -24663.019730239615)
+   (mixture-bytes . 3082.877466279952)
+   (file-length . 11150)
+   (bits-per-byte . 2.2119300206492927)
+   (nb-models . 38413)
+   (ctx-length-max . 10)))
 ; ->
 #;
-'((aphabet-size      . 90)
-  (mixture-log-prob  . -17095.10259010989)
-  (mixture-log2-prob . -24663.019730239615)
-  (mixture-bytes     . 3082.877466279952)
-  (file-length       . 11150)
-  (bits-per-byte     . 2.2119300206492927)
-  (nb-models         . 38413)
-  (ctx-length-max    . 10))
+((name              . "Henry") ; display outputs Henry without quotes
+ (aphabet-size      . 90)
+ (mixture-log-prob  . -17095.10259010989)
+ (mixture-log2-prob . -24663.019730239615)
+ (mixture-bytes     . 3082.877466279952)
+ (file-length       . 11150)
+ (bits-per-byte     . 2.2119300206492927)
+ (nb-models         . 38413)
+ (ctx-length-max    . 10))
 
