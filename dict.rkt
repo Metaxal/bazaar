@@ -108,13 +108,13 @@
                 res)))
 
 (define ((assoc-nice-output ~out) ass)
-  (define w (apply max (map (λ(p)(string-length (~a (car p)))) ass)))
+  (define w (apply max (map (λ(p)(string-length (~v (car p)))) ass)))
   (displayln 
    (string-join
     #:before-first "("
     (for/list ([p ass])
       (string-append
-       "(" (~a (car p) #:min-width w #:pad-string " ")
+       "(" (~v (car p) #:min-width w #:pad-string " ")
        " . " (~out (cdr p)) ")"))
     "\n "
     #:after-last ")")))
@@ -134,6 +134,9 @@
    (file-length . 11150)
    (bits-per-byte . 2.2119300206492927)
    (nb-models . 38413)
+   ("a key string" . "a value string")
+   (|a key symbol| . |a value symbol|)
+   (|a quite long key symbol| . #t)
    (ctx-length-max . 10)))
 ; ->
 #;
