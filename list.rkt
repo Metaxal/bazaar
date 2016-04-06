@@ -34,6 +34,35 @@
 (define (add-before l elt)
   (append-map (λ(e)(list elt e)) l))
 
+(define (list->cumul-list l)
+  (define sum 0)
+  (for/list ([x (in-list l)])
+    (set! sum (+ sum x))
+    sum))
+
+(module+ test
+  (check-equal?
+   (list->cumul-list '(2 8 3 5 5 0 -1 2))
+   '(2 10 13 18 23 23 22 24)))
+
+;; l: (listof real?)
+;; -> (listof real?)
+(define (normalize l)
+  (define s (apply + l))
+  (map (λ(x)(/ x s)) l))
+
+;; Maps a list of lists of elements (keeps the list of list structure).
+;; See also tree-map in tree.rkt
+(define (map-map proc ll)
+  (for/list ([l (in-list ll)])
+    (for/list ([x (in-list l)])
+      (proc x))))
+
+(module+ test
+  (check-equal?
+   (map-map add1 '((0 1) (2 3) (5 4)))
+   '((1 2) (3 4) (6 5))))
+
 ;;; These should be in values.rkt instead
 
 ;; Return the multiple values of proc-call as a list
