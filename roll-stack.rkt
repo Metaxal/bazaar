@@ -62,7 +62,7 @@
   (set-roll-stack-n! rs (roll-stack-nmax rs)))
 
 (module+ test
-  (require bazaar/debug
+  (require (except-in bazaar/debug check-=)
            racket/list)
   (let* ([N 10]
          [rs (make-roll-stack N)]
