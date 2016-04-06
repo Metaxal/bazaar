@@ -29,6 +29,12 @@
     (for/fold ([x a] ...) (y ...)
       body ...)))
 
+;; Use the #:when #t thing for more flexibility
+#;(define-syntax-rule (define/for*/fold ([x a] ...) (y ...) body ...)
+  (define-values (x ...)
+    (for*/fold ([x a] ...) (y ...)
+      body ...)))
+
 #; ; Ex:
 (begin
   (for/fold/define 
