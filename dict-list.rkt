@@ -6,6 +6,7 @@
          (for-syntax racket/base))
 
 (provide dict-list-filter
+         dict-list-keys
          dict-list-distinct-values
          dict-list-values
          dict-list-count
@@ -57,6 +58,12 @@
 (define (dict-list-distinct-values dlist key)
   (remove-duplicates (dict-list-values dlist key)))
 
+(define (dict-list-keys dlist)
+  (remove-duplicates
+   (for*/list ([dic (in-list dlist)]
+               [(k v) (in-dict dic)])
+     k)))
+
 ;; Groups the data based on key-or-proc
 (define (dict-list-group-by dlist key-or-proc)
   (define dict-key-ref (key-or-proc->dict-key-ref key-or-proc))
@@ -96,4 +103,65 @@
                 '((1 . 2) (2 . 2) (3 . 1)))
   )
 
+
+(module* stats #f
+  (require math
+           racket/file
+           bazaar/dict
+           bazaar/plot)
+
+  (provide log-file->dict-list
+           plot-profiles
+           dict-list-stats)
+  
+  ;; A 'data' is a dict-list, i.e. a list of similar dictionaries
+  
+  (define (log-file->dict-list f)
+    (filter list? (file->list f)))
+  
+  (define (stats l)
+    (if (empty? l)
+        (list (cons "### empty list ###" ""))
+        (list (cons 'length (length l))
+              (cons 'mean (mean l))
+              (cons 'std-dev (sqrt (variance l)))
+              (cons 'median (median < l))
+              (cons 'sum (apply + l))
+              (cons 'max (apply max l))
+              (cons 'min (apply min l)))))
+  
+  (define (plot-data-l l)
+    (if (empty? l)
+        "Cannot plot empty list"
+        (plot
+         (list (points (list->points (sort l <)))
+               (x-axis 0))
+         #:x-label "Sorted data index" #:y-label "Redundancy")))
+  
+  (define (plot-profiles dlist keys)
+    (plot
+     (for/list ([k keys] [i (in-naturals)])
+       (lines (list->points (sort (dict-list-values dlist k) <))
+              #:label k #:color i))
+     #:width 800 #:height 600))
+  
+  ;; key: (or/c any? procedure?) ;
+  ;; If key is a procedure, then it is applied to a dictionary to retrieve a value.
+  ;; If key2 is given, key1 must be a key and 
+  (define (dict-list-stats dlist key [key2 #f] [cmp -])
+    (define l
+      (cond [key2 (map (λ(d)(- (dict-ref d key) (dict-ref d key2))) dlist)]
+            [(procedure? key) (map key dlist)]
+            [else (dict-list-values dlist key)]))
+    (printf "key1: ~v\n" key)
+    (when key2 (printf "key2: ~v\n" key2))
+    (println (plot-data-l l))
+    (assoc-nice-print
+     (append (cons (cons "*** all ***" "")
+                   (stats l))
+             (cons (cons "*** negative ***" "")
+                   (stats (filter negative? l)))
+             (cons (cons "*** positive ***" "")
+                   (stats (filter positive? l))))))
+  )
 ;;; See usage example at the end of "restarting-kt.rkt"
