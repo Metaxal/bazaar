@@ -58,7 +58,11 @@
 (displayln
    (table->string
     '((123 456 77 54 1  5646547987 41 1)
-      (a b c d e f g h i))))
+      (a b c d e f g h)
+      (111 22 3333 44 5 6 7 8888))
+    #:align 'right
+    #:col-sep " | "
+    #:row-sep (λ(len)(string-append "\n" (make-string len #\-) "\n"))))
 
 
 ;;;;;;;;;;;;;;;;;;;;
