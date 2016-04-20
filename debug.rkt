@@ -13,7 +13,8 @@
          debug-expr
          assert
          check-≃
-         check-sum≃1
+         (rename-out [check-≃ check-approx=])
+         check-sum=1
          check-proba-list
          vars->assoc
          expr->expr+symbol
@@ -97,19 +98,19 @@
 (check-≃ 0.99 1.009 0.02)
 
 ;; Checks that the elements of the list l sums to 1 within ε (1e-7 by default)
-(define-syntax check-sum≃1
+(define-syntax check-sum=1
   (syntax-rules ()
-    [(_ l) (check-sum≃1 l (current-check-precision))]
+    [(_ l) (check-sum=1 l (current-check-precision))]
     [(_ l ε) (check-≃ (apply + l) 1. ε)]))
 
-(check-sum≃1 '(0.2 0.3 .5))
+(check-sum=1 '(0.2 0.3 .5))
 
 (define-syntax check-proba-list
   (syntax-rules ()
     [(_ l) (check-proba-list l (current-check-precision))]
     [(_ l ε)
      (begin
-       (check-sum≃1 l ε)
+       (check-sum=1 l ε)
        (for ([x l])
          (unless (<= 0. x (+ 1. ε)) ; can be slightly larger than 1.??
            (error "Expected value in [0, 1], got" x))))]))
