@@ -12,7 +12,7 @@
          debug-vars/loc
          debug-expr
          assert
-         check-=
+         check-≃
          check-sum=1
          check-proba-list
          vars->assoc
@@ -84,7 +84,7 @@
 (define current-check-precision (make-parameter  1e-7))
 
 ;; Checks that x is with ε of y, produces an error otherwise
-(define-syntax check-=
+(define-syntax check-≃
   (syntax-rules ()
     [(_ x y)(check-= x y (current-check-precision))]
     [(_ x y ε)
@@ -94,13 +94,13 @@
        (unless (<= (abs (- xx yy)) εε)
          (error "check-= failed:" xx yy εε)))]))
 
-(check-= 0.99 1.009 0.02)
+(check-≃ 0.99 1.009 0.02)
 
 ;; Checks that the elements of the list l sums to 1 within ε (1e-7 by default)
 (define-syntax check-sum=1
   (syntax-rules ()
     [(_ l) (check-sum=1 l (current-check-precision))]
-    [(_ l ε) (check-= (apply + l) 1. ε)]))
+    [(_ l ε) (check-≃ (apply + l) 1. ε)]))
 
 (check-sum=1 '(0.2 0.3 .5))
 
