@@ -4,7 +4,9 @@
 
 (require (for-syntax syntax/parse
                      racket/base)
-         racket/stxparam)
+         racket/stxparam
+         "base.rkt"
+         )
 
 (provide debug-var
          debug-vars
@@ -17,7 +19,6 @@
          check-sum=1
          check-proba-list
          vars->assoc
-         expr->expr+symbol
          info-str
          ok
          time*
@@ -63,10 +64,6 @@
 
 (define-syntax-rule (vars->assoc var ...)
   (list (cons 'var var) ...))
-
-;; Returns the value expression and the quoted expression
-(define-syntax-rule (expr->expr+symbol expr)
-  (values expr 'expr))
 
 (define-syntax assert
   (syntax-parser
