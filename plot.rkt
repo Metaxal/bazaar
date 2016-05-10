@@ -318,7 +318,9 @@
   (define (dist color palette)
     (apply min
            (for/list ([c palette] [i (in-naturals 1)])
-             (+ (color-dist c color) (/ (+ i 1.) i))))) ; small bonus for old colors
+             (+ (color-dist c color)
+                #;(/ (+ i 1.) i) ; small bonus for old colors
+                (/ i))))) ; small bonus for recent colors
 
   ;; build all color compositions of 0, 63, 127, 191, 255,
   ;; start with white and recursively add the color that is the farther away for the current colors
