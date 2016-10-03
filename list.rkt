@@ -14,6 +14,22 @@
 (define (choose l)
   (list-ref l (random (length l))))
 
+;; Returns the index and value of the >?-maximal element of l.
+;; l must be a non-empty list.
+(define (index-max l [>? >])
+  (for/fold ([imax 0]
+             [vmax (first l)])
+            ([i (in-naturals 1)]
+             [v (in-list (rest l))])
+    (if (>? v vmax)
+        (values i v)
+        (values imax vmax))))
+
+(module+ test
+  (let-values ([(i v) (index-max '(0 4 2 1 8 4))])
+    (check-equal? i 4)
+    (check-equal? v 8)))
+
 (define (transpose ll)
   (if (empty? ll)
       ll
