@@ -2,6 +2,7 @@
 ;;; Copyright (C) Laurent Orseau, 2010-2013
 ;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
+;;; 2d matrices
 
 (require racket/performance-hint
          racket/list
@@ -9,7 +10,7 @@
          )
 
 (provide (rename-out [create-matrix make-matrix])
-         matrix?
+         (struct-out matrix)
          matrix-copy
          matrix-copy!
          matrix-fill!
@@ -22,11 +23,9 @@
          matrix-update!
          matrix-map!
          matrix-for-each
-         matrix-nrows
-         matrix-ncols
          )
 
-(define-struct matrix 
+(struct matrix 
   (nrows ncols mat)
   #:property prop:sequence
   (lambda (mx)
@@ -56,7 +55,7 @@
   (vector-copy! (matrix-mat to-mat) 0 (matrix-mat mat)))
 
 (define (matrix-copy mat)
-  (make-matrix (matrix-nrows mat) (matrix-ncols mat)
+  (matrix (matrix-nrows mat) (matrix-ncols mat)
                (vector-copy (matrix-mat mat))))
 
 (define (matrix-fill! mat val)
@@ -68,11 +67,11 @@
   (matrix-mat m))
 
 (define (create-matrix nrows [ncols nrows] [val 0])
-  (make-matrix nrows ncols 
+  (matrix nrows ncols 
                (make-vector (* nrows ncols) val)))
 
 (define (ll->matrix ll)
-  (make-matrix (length ll) (length (first ll))
+  (matrix (length ll) (length (first ll))
                 (list->vector (apply append ll))))
 
 (define (matrix->ll mat)
