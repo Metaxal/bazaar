@@ -16,6 +16,7 @@
 
 ;; Returns the index and value of the >?-maximal element of l.
 ;; l must be a non-empty list.
+;; Use >= instead of > to retrieve the last index
 (define (index-max l [>? >])
   (for/fold ([imax 0]
              [vmax (first l)])
