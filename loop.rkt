@@ -24,6 +24,8 @@
 
 
 ;; for/fold is very often used with define-values
+;; todo: add a finalizer that applies to the value before being set to the variable.
+;; useful for lists that often are reversed.
 (define-syntax-rule (define/for/fold ([x a] ...) (y ...) body ...)
   (define-values (x ...)
     (for/fold ([x a] ...) (y ...)
