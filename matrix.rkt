@@ -23,6 +23,7 @@
          matrix-update!
          matrix-map!
          matrix-for-each
+         matrix-in-bounds?
          )
 
 (struct matrix 
@@ -79,6 +80,10 @@
     (for/list ([j (in-range (matrix-ncols mat))])
       (matrix-ref mat i j))))
 
+(define (matrix-in-bounds? mat row col)
+  (and (<= 0 row (- (matrix-nrows mat) 1))
+       (<= 0 col (- (matrix-ncols mat) 1))))
+
 (define (coord->index row col row-size)
   (+ (* row row-size) col))
 
@@ -121,33 +126,51 @@
 
 ) ; end encourage inline
 
-#| Tests | #
 
-(define mx (create-matrix 3 5))
-(for ([(row col val) mx])
-  (matrix-set! mx row col (* row col)))
+;=============;
+;=== Tests ===;
+;=============;
 
-(define mx2 (matrix-copy mx))
-(matrix-set! mx2 0 0 1000)
+(module+ test
+  (require rackunit)
+  
+  (define mx (create-matrix 3 5))
 
-(matrix->ll mx)
-(matrix->ll mx2)
+  (check-true (matrix-in-bounds? mx 0 0))
+  (check-true (matrix-in-bounds? mx 2 4))
+  (check-false (matrix-in-bounds? mx 2 5))
+  (check-false (matrix-in-bounds? mx 3 4))
+  (check-false (matrix-in-bounds? mx -1 0))
+  (check-false (matrix-in-bounds? mx 0 -1))
+  
+  (for ([(row col val) mx])
+    (matrix-set! mx row col (* row col)))
 
-(matrix-copy! mx mx2)
+  (check-equal? (matrix->ll mx)
+                '((0 0 0 0 0) (0 1 2 3 4) (0 2 4 6 8)))
 
-(matrix->ll mx)
-(matrix->ll mx2)
+  (define mx2 (matrix-copy mx))
+  (matrix-set! mx2 0 1 1000)
 
-(matrix-fill! mx 'a)
-(matrix->ll mx)
+  (check-equal? (matrix->ll mx2)
+                '((0 1000 0 0 0) (0 1 2 3 4) (0 2 4 6 8)))
 
-;(for/list ([(row col val) mx])
-;  (list row col val))
+  (check-equal? (matrix->ll mx)
+                '((0 0 0 0 0) (0 1 2 3 4) (0 2 4 6 8))) ; no change
 
-;(for/list ([(row col val) mx])
-;  (list row col val))
+  (matrix-copy! mx mx2)
 
+  (check-equal? (matrix->ll mx)
+                '((0 1000 0 0 0) (0 1 2 3 4) (0 2 4 6 8)))
 
-;|#
+  (check-equal? (matrix->ll mx2)
+                '((0 1000 0 0 0) (0 1 2 3 4) (0 2 4 6 8)))
+  
+  (matrix-fill! mx 'a)
+  
+  (check-equal? (matrix->ll mx)
+                '((a a a a a) (a a a a a) (a a a a a)))
 
-
+  (check-equal? (matrix->ll mx2)
+                '((0 1000 0 0 0) (0 1 2 3 4) (0 2 4 6 8))) ; no change
+  )
