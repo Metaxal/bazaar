@@ -1,6 +1,7 @@
 #lang racket/base
 
 (require plot
+         racket/list
          racket/dict)
 
 (provide (all-defined-out)
@@ -8,6 +9,46 @@
 
 (module+ test
   (require rackunit))
+
+;; Warning: Can have weird effects on DrRacket's window!
+(define (string-ticks string-list)
+  (let* ([N (length string-list)]
+         [inf+sup->low+up
+          (λ(inf sup)
+            (when (> inf sup)
+              (error 'bound-check "inf > sup in string-ticks; inf=~e, sup=~e" inf sup))
+            (values (max 0 (inexact->exact (ceiling inf)))
+                    (min (+ 1 (floor (inexact->exact sup))) N)))])
+    (ticks (λ(inf sup)
+             (define-values (low up) (inf+sup->low+up inf sup))
+             (if (< low up)
+                 (for/list ([i (in-range low up)])
+                   (pre-tick i #t))
+                 '()))
+           (λ(inf sup pre-ticks)
+             (for/list ([t pre-ticks])
+               (define idx (pre-tick-value t))
+               (if (and (exact-nonnegative-integer? idx)
+                        (< idx N))
+                   (list-ref string-list idx)
+                   ""))))))
+(module+ test
+  (let ([s '("a" "b" "c" "d" "e")])
+    (check-equal? (length (ticks-generate (string-ticks s) .1 .9)) 0)
+    (check-equal? (length (ticks-generate (string-ticks s) -3 -.1)) 0)
+    (check-equal? (length (ticks-generate (string-ticks s) 0 2)) 3)
+    (check-equal? (length (ticks-generate (string-ticks s) .1 2)) 2)
+    (check-equal? (length (ticks-generate (string-ticks s) 0 10)) 5)
+    ))
+
+(module+ drracket
+  
+  (ticks-generate (string-ticks '("a" "b" "c" "d" "e")) -5 2)
+  ; Example of string-ticks
+  (parameterize ([plot-y-ticks (string-ticks '("a" "b" "c" "d" "e"))])
+    (plot
+     (function (λ(x)x) -1 1)
+     #:y-min -2 #:y-max 2)))
 
 ;; Warning: Contrary to build-list, it starts at 1 and ends at n (not n-1)
 (define (build-points f a [b #f] [inc 1])
@@ -286,6 +327,7 @@
   (λ()(begin0 (palette-ref idx #:palette palette)
               (set! idx (add1 idx)))))
 
+#;
 (module+ drracket
   (require slideshow racket/draw)
 
@@ -319,7 +361,7 @@
     (apply min
            (for/list ([c palette] [i (in-naturals 1)])
              (+ (color-dist c color)
-                #;(/ (+ i 1.) i) ; small bonus for old colors
+                #;(/ i (+ i 1.)) ; small bonus for old colors
                 (/ i))))) ; small bonus for recent colors
 
   ;; build all color compositions of 0, 63, 127, 191, 255,
