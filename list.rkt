@@ -124,3 +124,35 @@
 (module+ test
   (check-fail (remove-last '()))
   (check-equal? (remove-last '(a b c)) '(a b)))
+
+
+;; l : list of numbers.
+;; αt : (or procedure-arity-1 number-in-[0,1]) : weight of the past, = 1 - weight of current number.
+;;   First element has t-index 0. By default the rolling average is a uniform average of all numbers
+;;   up to the current one.
+(define (rolling-average l [αt (λ(t)(/ t (+ t 1)))])
+  (let ([αt (if (number? αt) (λ(t)αt) αt)])
+    (if (empty? l)
+        '()
+        (let loop ([l (rest l)]
+                   [t 1]
+                   [l2 (list (first l))]
+                   [avg (first l)])
+          (if (empty? l)
+              (reverse l2)
+              (let* ([α (αt t)]
+                     [new-avg (+ (* α avg) (* (- 1 α) (first l)))])
+                (loop (rest l)
+                      (+ t 1)
+                      (cons new-avg l2)
+                      new-avg)))))))
+
+(module+ test
+  (let ([l (range 10)])
+    (check-equal? (rolling-average l)
+                  (map (λ(i)(/ i 2)) l))
+    (check-equal? (rolling-average l 1/2)
+                  (build-list (length l) (λ(i)(+ i -1 (expt 2 (- i))))))))
+
+
+
