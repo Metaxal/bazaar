@@ -4,12 +4,16 @@
 
 (require racket/list
          racket/contract
+         racket/generator
+         racket/sequence
          syntax/parse/define)
 
 (provide (all-defined-out))
 
 (module+ test
-  (require "rackunit.rkt"))
+  (require "rackunit.rkt"
+           racket/set
+           math/number-theory))
 
 (define (choose l)
   (list-ref l (random (length l))))
@@ -155,4 +159,38 @@
                   (build-list (length l) (λ(i)(+ i -1 (expt 2 (- i))))))))
 
 
+
+;; All binary sequences of length T containing exactly k elements.
+;; There are (binomial T k) such sequences.
+(define (in-binary-lists T k)
+  (in-generator
+   (let loop ([l '()] [t 0] [n1 0])
+     (if (= t T)
+         (yield l)
+         (begin
+           (when (> (+ n1 T (- t))
+                    k) ; we will still have room for the ones later if we place a zero right now
+             (loop (cons 0 l) (+ t 1) n1))
+           (when (< n1 k) ; we can still place some ones
+             (loop (cons 1 l) (+ t 1) (+ n1 1))))))))
+
+(module+ test
+  (displayln "Tests.")
+  (check set=?
+         (sequence->list (in-binary-lists 5 2))
+         '((1 1 0 0 0)
+           (1 0 1 0 0)
+           (0 1 1 0 0)
+           (1 0 0 1 0)
+           (0 1 0 1 0)
+           (0 0 1 1 0)
+           (1 0 0 0 1)
+           (0 1 0 0 1)
+           (0 0 1 0 1)
+           (0 0 0 1 1))
+         )
+  (check = (sequence-length (in-binary-lists 10 7))
+           (binomial 10 7))
+  (check = (sequence-length (in-binary-lists 10 3))
+           (binomial 10 3)))
 
