@@ -107,6 +107,18 @@
 ;   (list z y x))
 ;-> '(c b a)
 
+(define (replace l a b
+                   #:=? [=? equal?])
+    (map (λ(x)(if (=? x a) b x)) l))
+
+(module+ test
+  (check-equal? (replace '(a b c b c d) 'b 3)
+                '(a 3 c 3 c d))
+  (check-equal? (replace '(a b c b c d) 'e 3)
+                '(a b c b c d))
+  (check-equal? (replace '() 'e 3)
+                '()))
+
 ;; Replaces the last element of l by x.
 ;; If l is empty, the empty list is returned.
 (define/contract (replace-last l x)
