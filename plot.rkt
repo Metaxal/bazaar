@@ -80,11 +80,13 @@
    (build-points (λ(x)(* x x)) 1 10 2)
    '((1 1) (3 9) (5 25) (7 49) (9 81))))
 
-;; TODO: add a #:inc-skip argument that skips several items in the list
-;; (useful to build light-weight plots)
-(define (list->points l [start 0])
-  (for/list ([x l] [i (in-naturals start)])
-    (list i x)))
+;; skip-rec: number of elements to skip in the output list (useful for plots with large lists)
+(define (list->points l [start 0]
+                      #:skip-rec [skip-rec 0])
+  (for/list ([x l]
+             [i (in-naturals)]
+             #:when (= 0 (modulo i (+ 1 skip-rec))))
+    (list (+ i start) x)))
 
 ;; Useful for calls like:
 #;(plot (lines (list->points '(0.3 0.2 0.75))))
@@ -92,7 +94,13 @@
 (module+ test
   (check-equal?
    (list->points '(a b c) 2)
-   '((2 a) (3 b) (4 c))))
+   '((2 a) (3 b) (4 c)))
+  (check-equal?
+   (list->points (range 10) #:skip-rec 2)
+   '((0 0) (3 3) (6 6) (9 9)))
+  (check-equal?
+   (list->points (range 10) 2 #:skip-rec 2)
+   '((2 0) (5 3) (8 6) (11 9))))
 
 (define (dict-histogram d)
   (discrete-histogram
