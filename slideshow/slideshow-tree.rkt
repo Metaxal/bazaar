@@ -83,10 +83,16 @@
         )))
    ))
 
-(module+ main
+(module+ drracket
   (define t1 '(a (b1 (c1 d1 d2) (c2 d3 d4)) 
                  (b2 (c3 d5) c4)))
-  (draw-tree-left-right-down (tree-map t1 (λ(x)(t (symbol->string x))))
-                             10 20)
-  
+  (define t1-t (tree-map t1 (λ(x)(t (symbol->string x)))))
+  (displayln "top-down")
+  (draw-tree-top-down         t1-t 40 20)
+  (displayln "left-right")
+  (draw-tree-left-right       t1-t 40 20)
+  (displayln "left-right-down")
+  (draw-tree-left-right-down  t1-t 10 20)
+  (displayln "top-left-right")
+  (draw-tree-top-left-right   t1-t 10 20)
   )
