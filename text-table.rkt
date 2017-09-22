@@ -9,17 +9,14 @@
          racket/format
          racket/dict)
 
-(provide (except-out (all-defined-out) ->string))
-
-(define (->string a)
-  (format "~a" a))
+(provide (all-defined-out))
 
 ;; Simple table to string conversion, ensuring consistent column width
 ;; See below for more complex ones.
 (define (table->string ll
                        #:->string [->string ~a]
-                       #:col-sep [col-sep " "]
-                       #:row-sep [row-sep "\n"] ; either string or (λ(col-length)str-expr)
+                       #:col-sep [col-sep " "] ; string?
+                       #:row-sep [row-sep #f] ; #f or char?
                        #:align [align 'left]) ; like for ~a
   (let* ([lens (map length ll)]
          [len1 (first lens)])
@@ -48,21 +45,21 @@
                        col-sep))
         (reverse ll-str)))
   (string-join
-   rows-str
-   (if (procedure? row-sep)
-       (row-sep (string-length (first rows-str)))
-       row-sep)))
+   (if row-sep
+       (add-between rows-str (make-string (string-length (first rows-str)) row-sep))
+       rows-str)
+   "\n"))
 
-;; Example
-#;
-(displayln
-   (table->string
-    '((123 456 77 54 1  5646547987 41 1)
-      (a b c d e f g h)
-      (111 22 3333 44 5 6 7 8888))
-    #:align 'right
-    #:col-sep " | "
-    #:row-sep (λ(len)(string-append "\n" (make-string len #\-) "\n"))))
+
+(module+ main
+ (displayln
+  (table->string
+   '((a b c d e f g h)
+     (123 456 77 54 1  5646547987 41 1)
+     (111 22 3333 44 5 6 7 8888))
+   #:align 'right
+   #:col-sep " │ "
+   #:row-sep #\—)))
 
 
 ;;;;;;;;;;;;;;;;;;;;
@@ -91,7 +88,7 @@
     (apply string-append
            (table-map t 
                       (λ(n str len) 
-                        (string-pad-right (->string (list-ref row n)) len))
+                        (string-pad-right (~a (list-ref row n)) len))
                       (atable-sep t) (atable-sep t) (atable-sep t)
                       )))
 
@@ -99,7 +96,7 @@
    (apply string-append
           (table-map t 
                      (λ(n str len)
-                       (string-pad-right (->string str) len))
+                       (string-pad-right (~a str) len))
                      (atable-sep t) (atable-sep t) (atable-sep t))
           ))
 
