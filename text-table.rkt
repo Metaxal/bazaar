@@ -36,14 +36,14 @@
             (cons (reverse row-str) ll-str)))
   (define rows-str
     (map (λ(row-str)
-          (string-join (map (λ(str size)
-                              (~a str
-                                  #:min-width size
-                                  #:align align))
-                            row-str
-                            cell-sizes)
-                       col-sep))
-        (reverse ll-str)))
+           (string-join (map (λ(str size)
+                               (~a str
+                                   #:min-width size
+                                   #:align align))
+                             row-str
+                             cell-sizes)
+                        col-sep))
+         (reverse ll-str)))
   (string-join
    (if row-sep
        (add-between rows-str (make-string (string-length (first rows-str)) row-sep))
@@ -85,28 +85,25 @@
      (atable-head t))))
 
 (define (table-row t row)
-    (apply string-append
-           (table-map t 
-                      (λ(n str len) 
-                        (string-pad-right (~a (list-ref row n)) len))
-                      (atable-sep t) (atable-sep t) (atable-sep t)
-                      )))
+  (apply string-append
+         (table-map t 
+                    (λ(n str len) 
+                      (string-pad-right (~a (list-ref row n)) len))
+                    (atable-sep t) (atable-sep t) (atable-sep t))))
 
 (define (table-head t)
-   (apply string-append
-          (table-map t 
-                     (λ(n str len)
-                       (string-pad-right (~a str) len))
-                     (atable-sep t) (atable-sep t) (atable-sep t))
-          ))
+  (apply string-append
+         (table-map t 
+                    (λ(n str len)
+                      (string-pad-right (~a str) len))
+                    (atable-sep t) (atable-sep t) (atable-sep t))))
 
 (define (table-line t getter)
-    (apply string-append
-           (apply table-map t 
-                  (λ(n str len) 
-                    (build-string len (λ(n)(atable-dash t))))
-                  (getter t)
-                  )))
+  (apply string-append
+         (apply table-map t 
+                (λ(n str len) 
+                  (build-string len (λ(n)(atable-dash t))))
+                (getter t))))
 (define (table-first-line t)
   (table-line t atable-first-line))
 (define (table-mid-line t)
@@ -138,5 +135,4 @@
                   (table-row t1 '(a b c))
                   (table-mid-line t1)
                   (table-row t1 '(x y "z"))
-                  (table-last-line t1)))
-  )
+                  (table-last-line t1))))
