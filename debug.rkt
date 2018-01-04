@@ -81,6 +81,7 @@
 
 (define current-check-precision (make-parameter  1e-7))
 
+;; Todo: rename to assert?
 ;; Checks that x is with ε of y, produces an error otherwise
 (define-syntax check-≃
   (syntax-rules ()
@@ -92,15 +93,18 @@
        (unless (<= (abs (- xx yy)) εε)
          (error "check-≃ failed:" xx yy εε)))]))
 
-(check-≃ 0.99 1.009 0.02)
+(module+ test
+  (check-≃ 0.99 1.009 0.02))
 
 ;; Checks that the elements of the list l sums to 1 within ε (1e-7 by default)
 (define-syntax check-sum=1
   (syntax-rules ()
     [(_ l) (check-sum=1 l (current-check-precision))]
-    [(_ l ε) (check-≃ (apply + l) 1. ε)]))
+    [(_ l ε) (check-≃ (for/sum ([x l]) x) 1. ε)]))
 
-(check-sum=1 '(0.2 0.3 .5))
+(module+ test
+  (check-sum=1 '(0.2 0.3 .5))
+  (check-sum=1 #(0.2 0.3 .5)))
 
 (define-syntax check-proba-list
   (syntax-rules ()
@@ -112,7 +116,8 @@
          (unless (<= 0. x (+ 1. ε)) ; can be slightly larger than 1.??
            (error "Expected value in [0, 1], got" x))))]))
 
-(check-proba-list '(0.2 0.3 .5))
+(module+ test
+  (check-proba-list '(0.2 0.3 .5)))
 
 
 ;; Surround an expr with this procedure to output 
