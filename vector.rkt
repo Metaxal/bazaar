@@ -1,4 +1,5 @@
 #lang racket/base
+(require racket/vector)
 
 (provide (all-defined-out))
 
@@ -29,3 +30,19 @@
          (vector-update! vec idx proc-or-value)
          (vector-set! vec idx proc-or-value))]))
 
+(module+ test
+  (let ([v (vector->proc (make-vector 3 1))])
+    (check = (v 2) 1)
+    (v 2 5)
+    (check = (v 2) 5)
+    (check = (v 1) 1)
+    (v 2 add1)
+    (check-equal? (v) #(1 1 6))))
+
+;; Returns an element of v chosen uniformly
+(define (vector-choose v)
+  (vector-ref v (random (length v))))
+
+(define (vector-normalize! v)
+  (define sum (for/sum ([x (in-vector v)]) x))
+  (vector-map! (λ(x)(/ x sum)) v))
