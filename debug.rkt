@@ -5,6 +5,7 @@
 (require (for-syntax syntax/parse
                      racket/base)
          racket/stxparam
+         rackunit
          "base.rkt"
          )
 
@@ -91,8 +92,7 @@
      (let ([xx x]
            [yy y]
            [εε ε])
-       (unless (<= (abs (- xx yy)) εε)
-         (error "check-≃ failed:" xx yy εε)))]))
+       (check-= xx yy εε))]))
 
 (module+ test
   (check-≃ 0.99 1.009 0.02))
@@ -113,12 +113,11 @@
     [(l ε)
      (check-sum=1 l ε)
      (for ([x l])
-       (unless (<= 0. x (+ 1. ε)) ; can be slightly larger than 1.??
-         (error "Expected value in [0, 1], got" x)))]))
+       (check >= x 0.)
+       (check <= x (+ 1. ε)))])) ; can be slightly larger than 1.??
 
 (module+ test
   (check-proba-list '(0.2 0.3 .5)))
-
 
 ;; Surround an expr with this procedure to output 
 ;; its value transparently
