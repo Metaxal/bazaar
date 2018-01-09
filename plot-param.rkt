@@ -34,6 +34,7 @@
         (- M m))))
 
 (define (plot/param params renderer-tree-proc
+                    #:snapshots? [snapshots? #f]
                     #:x-min [x-min #f]
                     #:x-max [x-max #f]
                     #:y-min [y-min #f]
@@ -52,7 +53,9 @@
      (for/list ([param-vals (in-list (cons (map plot-param-value params)
                                            param-snapshots))]
                 [idx (in-naturals 0)])
-       (apply renderer-tree-proc idx param-vals))
+       (if snapshots?
+           (apply renderer-tree-proc idx param-vals)
+           (apply renderer-tree-proc param-vals)))
      dc
      0 0
      w h
@@ -107,14 +110,16 @@
                     (error (format "Not a number ~a for plot-param ~a" tf-val (plot-param-name p))))))]))
     (void))
   (define bt-snapshots
-    (new button%
-         [parent fr]
-         [label "Snapshot"]
-         [callback (λ(bt ev)
-                     (set! param-snapshots
-                       (append param-snapshots
-                               (list (map plot-param-value params))))
-                     (send cv refresh-now))]))
+    (if snapshots?
+        (new button%
+             [parent fr]
+             [label "Snapshot"]
+             [callback (λ(bt ev)
+                         (set! param-snapshots
+                           (append param-snapshots
+                                   (list (map plot-param-value params))))
+                         (send cv refresh-now))])
+        #f))
   (send fr show #t))
 
 ;:::::::::::::;
@@ -140,9 +145,10 @@
   (make-simple-examples
    
    (plot/param
+    #:snapshots? #t
     (list (make-plot-param "ε" -1 1 .5 100)
           (make-plot-param "x-max" 1 100 2 100))
-    (λ(idx ε x-max)
+    (λ(idx ε x-max) ; idx is the index of the snapshot
       (list
        (function log 0 x-max #:color 0 #:label "ln")
        (function (λ(x)(/ (- 1 (expt x (- ε))) ε)) #:color (+ (* 2 idx) 2)
@@ -156,7 +162,7 @@
               (make-plot-param "X" 1 1000 2 1000)))
     (plot/param
      (list α-param X-param)  
-     (λ(idx α X) ; same order as the list of parameters, idx is the index of the current snapshot (0 if no snapshot)
+     (λ(α X) ; same order as the list of parameters, idx is the index of the current snapshot (0 if no snapshot)
        (list
         (function (λ(x)
                     (/ (log (+ 1 (* α (- x 1))))
@@ -174,7 +180,7 @@
    (list (make-plot-param "α" 0 1 .5 100)
          (make-plot-param "β" 0 1 .5 100)
          (make-plot-param "X" 1 1000 2 1000))
-   (λ(idx α β X)
+   (λ(α β X)
      (list
       (function (λ(x)(log (+ 1 x))) #:color "black" #:label "ln1+x")
       #;(function (λ(x)(- (expt (+ 1 (* α x)) β)
@@ -192,7 +198,7 @@
   (plot/param
    (list (make-plot-param "a" 0 10 .5 100)
          (make-plot-param "b" 0 10 2 100))
-   (λ(idx a b)
+   (λ(a b)
      (list (function (λ(ε)(+ (expt a ε) (expt b ε)))
                      0 2 #:color "blue" #:label "a^ε + b^ε")
            (function (λ(ε)[expt (+ a b) ε])
@@ -200,6 +206,7 @@
    #:x-label "δ")
 
   (plot/param
+   #:snapshots? #t
    (list (make-plot-param "ε" 0 1 .5 100)
          (make-plot-param "α" 0 1 .5 100)
          (make-plot-param "x-max" 1 10))
@@ -218,7 +225,7 @@
    "Approximation of the logit function"
    (plot/param
     (list (make-plot-param "ε" 0 1 100))
-    (λ(idx ε)(list 
+    (λ(ε)(list 
               (function (λ(x)(- (* (/ 1 ε (expt 2 ε)) (- (/ (expt (- 1 x) ε)) (/ (expt x ε))))
                                 (log (/ x (- 1 x))))) 0 1 #:color "cyan")
               (x-axis)))
