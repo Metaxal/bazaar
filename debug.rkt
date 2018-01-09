@@ -14,6 +14,7 @@
          debug-vars/loc
          debug-expr
          assert
+         current-check-precision
          check-≃
          (rename-out [check-≃ check-approx=])
          check-sum=1
