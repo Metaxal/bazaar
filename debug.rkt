@@ -84,10 +84,10 @@
 
 ;; Todo: rename to assert?
 ;; Checks that x is with ε of y, produces an error otherwise
-(define-syntax check-≃
-  (syntax-rules ()
-    [(_ x y)(check-≃ x y (current-check-precision))]
-    [(_ x y ε)
+(define check-≃
+  (case-lambda
+    [(x y)(check-≃ x y (current-check-precision))]
+    [(x y ε)
      (let ([xx x]
            [yy y]
            [εε ε])
@@ -98,24 +98,23 @@
   (check-≃ 0.99 1.009 0.02))
 
 ;; Checks that the elements of the list l sums to 1 within ε (1e-7 by default)
-(define-syntax check-sum=1
-  (syntax-rules ()
-    [(_ l) (check-sum=1 l (current-check-precision))]
-    [(_ l ε) (check-≃ (for/sum ([x l]) x) 1. ε)]))
+(define check-sum=1
+  (case-lambda
+    [(l) (check-sum=1 l (current-check-precision))]
+    [(l ε) (check-≃ (for/sum ([x l]) x) 1. ε)]))
 
 (module+ test
   (check-sum=1 '(0.2 0.3 .5))
   (check-sum=1 #(0.2 0.3 .5)))
 
-(define-syntax check-proba-list
-  (syntax-rules ()
-    [(_ l) (check-proba-list l (current-check-precision))]
-    [(_ l ε)
-     (begin
-       (check-sum=1 l ε)
-       (for ([x l])
-         (unless (<= 0. x (+ 1. ε)) ; can be slightly larger than 1.??
-           (error "Expected value in [0, 1], got" x))))]))
+(define check-proba-list
+  (case-lambda
+    [(l) (check-proba-list l (current-check-precision))]
+    [(l ε)
+     (check-sum=1 l ε)
+     (for ([x l])
+       (unless (<= 0. x (+ 1. ε)) ; can be slightly larger than 1.??
+         (error "Expected value in [0, 1], got" x)))]))
 
 (module+ test
   (check-proba-list '(0.2 0.3 .5)))
