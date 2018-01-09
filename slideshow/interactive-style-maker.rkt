@@ -179,10 +179,7 @@
                                  (item "An item...")
                                  (subitem "... and a subitem")
                                  (text-button "Some more text"))
-                          ))))
-         )
-        ))))
+                          )))))))))
 
-
-(interactive-style-maker)
-
+(module+ main
+  (interactive-style-maker))

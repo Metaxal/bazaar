@@ -16,3 +16,6 @@
    "srfi-lite-lib"
    ))
 
+(define test-omit-paths
+  '("slideshow/examples"
+    "gui/examples"))

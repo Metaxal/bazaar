@@ -150,14 +150,14 @@
       #'(time (begin0 (begin body0 body1 ...)
                       (printf "at ~a line ~a:\n" pth line))))]))
 
-(module+ test
+(module+ drracket
   (time* 'bap))
 
 ;; Like `time*` but for each element of the body, wrapped in a begin
 (define-syntax-rule (time*/seq body ...)
   (begin (time* body) ...))
 
-(module+ test
+(module+ drracket
   (time*/seq
    'bloop
    'blip

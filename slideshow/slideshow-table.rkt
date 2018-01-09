@@ -11,12 +11,12 @@
 ;;;   Tables with Styles   ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (same-width pics )
-  (let ( [max-w (apply max (map pict-width pics))] )
+(define (same-width pics)
+  (let ([max-w (apply max (map pict-width pics))])
     (map (λ(p) (blank max-w (pict-height p)))
          pics)))
 (define (same-height pics )
-  (let ( [max-h (apply max (map pict-height pics))] )
+  (let ([max-h (apply max (map pict-height pics))])
     (map (λ(p)(blank (pict-width p) max-h))
          pics)))
 

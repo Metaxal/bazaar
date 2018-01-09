@@ -187,7 +187,6 @@
              (loop (cons 1 l) (+ t 1) (+ n1 1))))))))
 
 (module+ test
-  (displayln "Tests.")
   (check set=?
          (sequence->list (in-binary-lists 5 2))
          '((1 1 0 0 0)

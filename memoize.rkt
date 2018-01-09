@@ -43,3 +43,5 @@
     (define h (make-hash))
     (define (f args ...)
       (apply values (hash-ref! h (list args ...) (λ()(call-with-values (λ()body ...) list)))))))
+
+;; Todo: Throw an exception when a cycle is detected?
