@@ -75,54 +75,82 @@
   ;; racket rvector.rkt
   (require data/gvector)
   
-  (define N 40000000)
+  (define N 30000000)
+  
+  (define-syntax-rule (vtest label vmake vset! vref)
+    (begin
+      (newline)
+      (displayln label)
+      (collect-garbage)
+      (collect-garbage)
+      (let ([v (vmake)]) ; `let' ensures v is garbage-collected once out of scope
+        (displayln "set!")
+        (time
+         (for ([i (in-range N)])
+           (vset! v i i)))
+        (displayln "ref")
+        (displayln
+         (time
+          (for/sum ([i (in-range N)])
+            (vref v i)))))))
 
-  (displayln "vector (best size in 'hindsight'):")
-  (time
-   (let ([v (make-vector N)]) ; `let' ensures v is garbage-collected once out of scope
-     (for ([i (in-range N)])
-       (vector-set! v i i))))
+  
+  (vtest "vector (best size in 'hindsight'):"
+         (λ()(make-vector N))
+         vector-set!
+         vector-ref)
+  
+  (vtest "rvector (best size in 'hindsight'):"
+         (λ()(make-rvector N))
+         rvector-set!
+         rvector-ref)
+  
+  (vtest "rvector:"
+         (λ()(make-rvector))
+         rvector-set!
+         rvector-ref)
 
-  (collect-garbage)
-  (collect-garbage)
-  (displayln "gvector:")
-  (time
-   (let ([gv (make-gvector)])
-     (for ([i (in-range N)])
-       (gvector-set! gv i i))))
+  (vtest "gvector:"
+         (λ()(make-gvector))
+         gvector-set!
+         gvector-ref)
 
-  (collect-garbage)
-  (collect-garbage)
-  (displayln "rvector:")
-  (time
-   (let ([rv (make-rvector)])
-     (for ([i (in-range N)])
-       (rvector-set! rv i i))))
-
-  (collect-garbage)
-  (collect-garbage)
-  (displayln "rvector (best in hindsight):")
-  (time
-   (let ([rv (make-rvector N)])
-     (for ([i (in-range N)])
-       (rvector-set! rv i i))))
-
+ )
 #|
 Results:
 
 vector (best size in 'hindsight'):
-cpu time: 285 real time: 285 gc time: 5
-gvector:
-cpu time: 9987 real time: 9981 gc time: 5010
+set!
+cpu time: 300 real time: 300 gc time: 125
+ref
+cpu time: 168 real time: 167 gc time: 0
+449999985000000
+
+rvector (best size in 'hindsight'):
+set!
+cpu time: 518 real time: 517 gc time: 0
+ref
+cpu time: 484 real time: 483 gc time: 0
+449999985000000
+
 rvector:
-cpu time: 1608 real time: 1608 gc time: 332
-rvector (best in hindsight):
-cpu time: 869 real time: 868 gc time: 1
+set!
+cpu time: 1077 real time: 1076 gc time: 229
+ref
+cpu time: 492 real time: 491 gc time: 0
+449999985000000
+
+gvector:
+set!
+cpu time: 6980 real time: 6974 gc time: 3149
+ref
+cpu time: 2260 real time: 2258 gc time: 200
+449999985000000
 
 Comments:
-- On this test, rvectors are more than 5 times faster than gvectors (most of it being gc).
+- On this test, rvectors are more than 6-7 times faster than gvectors (half of it being gc).
 - a growing rvector really is within a time factor 2 of rvector initialized with the correct size.
-- Compared to `vector', there are a few overheads.
-  The check in rvector-ref is actually costly.
+- Even when given the correct initial size, the few checks performed by rvectors incur
+  a non-negligeable overhead.
+- rvector spent 21% of the time of gc, compared to 45% for gvectors.
 |#
-  )
