@@ -2,13 +2,14 @@
 
 (define deps
  '("base"
+   "data-lib"
    "draw-lib"
    "gui-lib"
    "images"
    "math-lib"
    "net-lib"
-   "plot-lib"
    "plot-gui-lib"
+   "plot-lib"
    "racket-index"
    "rackunit-lib"
    "scribble-lib"
