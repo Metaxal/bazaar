@@ -5,12 +5,14 @@
          (rename-out [construct-rvector rvector])
          make-rvector
          build-rvector
+         rvector-copy
          rvector-length
          rvector-ref
          rvector-set!
          rvector=?
          rvector->vector
-         vector->rvector)
+         vector->rvector
+         rvector->list)
 
 ;;; Resizable vectors.
 ;;; Much faster than data/gvector.
@@ -145,8 +147,21 @@
 (define (rvector-copy rvec)
   (struct-copy rvector rvec))
 
+(define (rvector->list rvec)
+  (define vec (rvector-vec rvec))
+  (let loop ([i (- (rvector-length rvec) 1)] [l '()])
+    (if (= i -1)
+        l
+        (loop (- i 1) (cons (vector-ref vec i) l)))))
+
+(define (rvector-fill! rvec v)
+  (define vec (rvector-vec rvec))
+  (for ([i (in-range (rvector-length rvec))])
+    (vector-set! vec i v)))
+
 (module+ test
-  (require rackunit)
+  (require rackunit
+           racket/list)
   
   (define rvec (make-rvector))
   (for ([i 100])
@@ -179,6 +194,9 @@
                        #:default-value 4))
   (check-equal? rvec rvec4)
 
+  (define rvec5 (apply construct-rvector (rvector->list rvec)))
+  (check-equal? rvec rvec5)
+
   (define rv-list (list rvec rvec1 rvec2 rvec3 rvec4))
   (for ([rv (in-list rv-list)]
         [default-value (in-list '(0 0 2 3 4))])
@@ -194,6 +212,14 @@
   ;; Check that the vectors are different entities after rvector-copy.
   (rvector-set! rvec1 200 201)
   (check-not-equal? rvec rvec1)
+
+  (rvector-fill! rvec1 10)
+  (check-equal? (rvector->list rvec1)
+                (make-list 201 10))
+  (rvector-set! rvec1 210 210)
+  ;; Filling should not change the default value.
+  (check = (rvector-ref rvec1 201) 0)
+  (check = (rvector-ref rvec1 209) 0)
   
   )
 
@@ -245,7 +271,7 @@
 
   (vtest "gvector:"
          make-gvector
-         gvector-set!
+         gvector-set! ; works only when increasing the size by at most 1
          gvector-ref)
 
  )
