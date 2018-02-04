@@ -2,6 +2,9 @@
 ;;; Copyright (C) Laurent Orseau, 2010-2013
 ;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
+
+;;; Obsolete: There is a now a standalone 'text-table' package on pkgs.racket-lang.org
+
 (require "loop.rkt"
          (only-in srfi/13 string-pad-right)
          racket/string
@@ -10,6 +13,11 @@
          racket/dict)
 
 (provide (all-defined-out))
+
+(define table-borders-dict
+  '((normal   . (#\─ "│" ("┌" "┬" "┐") ("├" "┼" "┤") ("└" "┴" "┘")))
+    (rounded  . (#\─ "│" ("╭" "┬" "╮") ("├" "┼" "┤") ("╰" "┴" "╯")))
+    (double   . (#\═ "║" ("╔" "╦" "╗") ("╠" "╬" "╣") ("╚" "╩" "╝")))))
 
 ;; Simple table to string conversion, ensuring consistent column width
 ;; See below for more complex ones.
@@ -113,12 +121,7 @@
 
 ;; borders: (or 'normal 'rounded 'double)
 (define (table-framed head [borders 'rounded])
-  (apply atable head
-         (dict-ref 
-          '((normal   . (#\─ "│" ("┌" "┬" "┐") ("├" "┼" "┤") ("└" "┴" "┘")))
-            (rounded  . (#\─ "│" ("╭" "┬" "╮") ("├" "┼" "┤") ("╰" "┴" "╯")))
-            (double   . (#\═ "║" ("╔" "╦" "╗") ("╠" "╬" "╣") ("╚" "╩" "╝"))))
-          borders)))
+  (apply atable head (dict-ref table-borders-dict borders)))
 
 (module+ main
   

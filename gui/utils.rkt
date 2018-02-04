@@ -1,6 +1,5 @@
 #lang racket/gui
-(require bazaar/debug
-         racket/contract/base)
+(require racket/contract/base)
 
 (define nnint? nonnegative-integer?)
 (provide
@@ -71,6 +70,8 @@
   (find-monitor (send pt get-x) (send pt get-y)))
 
 ;; Returns the position x, y in pixels for where to place a frame of size fr-w, fr-h
+;; on the specified monitor. If monitor is #f, then the monitor where the mouse
+;; pointer is is used.
 ;; pos-x: (or/c non-negative-integer? (one-of 'left 'center 'right))
 ;; pos-y: (or/c non-negative-integer?
 (define (find-x/y pos-x pos-y
@@ -108,7 +109,7 @@
       (get-display-left-top-inset #:monitor d))
     (define-values (w h)
       (get-display-size #:monitor d))
-    (vars->assoc d x y w h))
+    (list d x y w h))
   
   (define fr
     (new frame%

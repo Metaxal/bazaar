@@ -15,7 +15,7 @@
          rvector->list)
 
 ;;; Resizable vectors.
-;;; Much faster than data/gvector.
+;;; Much faster than data/gvector, but with less checks.
 
 ;;; When inserting a new element at a place that is outside the current range,
 ;;; the vector is resized to the smallest power of 2.
