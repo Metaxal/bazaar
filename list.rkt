@@ -68,6 +68,7 @@
 
 ;; l: (listof real?)
 ;; -> (listof real?)
+;; Assumes the sum is non-zero
 (define (normalize l)
   (define s (apply + l))
   (map (λ(x)(/ x s)) l))
@@ -205,3 +206,19 @@
   (check = (sequence-length (in-binary-lists 10 3))
            (binomial 10 3)))
 
+
+;; Like remove-duplicates but assumes the list is sorted.
+(define (remove-duplicates-sorted l [=? equal?])
+  (if (empty? l)
+      '()
+      (let loop ([l (rest l)] [res (list (first l))])
+        (if (empty? l)
+            (reverse res)
+            (if (=? (first l) (first res))
+                (loop (rest l) res)
+                (loop (rest l) (cons (first l) res)))))))
+(module+ test
+  (let ([l (build-list 100 (λ(i)(random 100)))])
+    (check-equal? (sort (remove-duplicates l) <)
+                (remove-duplicates-sorted (sort l <))))
+  )
