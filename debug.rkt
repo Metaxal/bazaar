@@ -70,11 +70,13 @@
 (define-syntax assert
   (syntax-parser
     [(_ expr:expr)
-     #'(unless expr
-         (error "Assertion failed:" 'expr))]
+     (syntax/loc #'expr
+       (unless expr
+           (error "Assertion failed:" 'expr)))]
     [(_ expr:expr ctx:expr ...)
-     #'(unless expr
-         (error "Assertion failed:" 'expr 'with-context: (vars->assoc ctx ...)))]))
+     (syntax/loc #'expr
+       (unless expr
+           (error "Assertion failed:" 'expr 'with-context: (vars->assoc ctx ...))))]))
 
 (module+ test
   (check-not-exn (λ()(assert (= 1 1))))

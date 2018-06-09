@@ -7,8 +7,21 @@
 
 (provide (all-defined-out))
 
+;; Increments the variable
 (define-simple-macro (++ var:id)
   (set! var (add1 var)))
+
+;; Increments the variable and returns the new value
+(define-simple-macro (++@ var:id)
+  (begin
+    (set! var (add1 var))
+    var))
+
+;; Increments the variable and returns the old value
+(define-simple-macro (@++ var:id)
+  (begin0
+    var
+    (set! var (add1 var))))
 
 (define-simple-macro (-- var:id)
   (set! var (sub1 var)))
