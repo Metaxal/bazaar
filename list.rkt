@@ -108,6 +108,26 @@
 ;   (list z y x))
 ;-> '(c b a)
 
+;; Returns the first element e in l such that (=? x (key e)), or not-found otherwise.
+(define (find x l #:key [key values] #:=? [=? equal?] #:not-found [not-found #f])
+  (let loop ([l l])
+    (if (empty? l)
+        not-found
+        (let ([e (first l)])
+          (if (=? x (key e))
+              e
+              (loop (rest l)))))))
+
+(module+ test
+  (let ([l '((a 1)(b 2)(c 3)(d 2))])
+    (check-equal? (find 'b l #:key first)
+                  '(b 2))
+    (check-equal? (find '(b 2) l)
+                  '(b 2))
+    (check-equal? (find '(b 3) l #:not-found 'none)
+                  'none)
+    ))
+
 (define (replace l a b
                    #:=? [=? equal?])
     (map (λ(x)(if (=? x a) b x)) l))
