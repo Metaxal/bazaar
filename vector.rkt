@@ -1,7 +1,11 @@
 #lang racket/base
 (require racket/vector)
 
-(provide (all-defined-out))
+(provide (all-defined-out)
+         (rename-out [vector-ref vref]
+                     [vector-set! vset!]
+                     [vector-update! vupdate!]
+                     [vector-length vlength]))
 
 (module+ test
   (require rackunit))
@@ -13,9 +17,6 @@
   (let ([vec (make-vector 3 1)])
     (vector-update! vec 1 add1)
     (check = (vector-ref vec 1) 2)))
-
-;; Some shortcuts, because long names are sometimes pretty cumbersome,
-;; in particular for vectors
 
 ;; Wrapping procedure to avoid writing vector-ref, vector-set! and vector-update! all the time
 ;; The two-argument case is an updater if proc-or-value is a procedure of arity 1,
