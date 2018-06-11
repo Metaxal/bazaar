@@ -208,6 +208,7 @@
 
 
 ;; Like remove-duplicates but assumes the list is sorted.
+;; Turns the search from quadratic to linear (or n log n if we count the cost of sorting).
 (define (remove-duplicates-sorted l [=? equal?])
   (if (empty? l)
       '()
