@@ -9,6 +9,8 @@
 ;; Also see data/heap:
 ;; /usr/share/racket-7.0.0.1/pkgs/data-lib/data/heap.rkt
 
+;; TODO: Cache the extracted keys.
+
 ;; Index 0 is skipped for convenience.
 
 (define (grow-vector v1)
@@ -28,9 +30,14 @@
 
 ;; Returns a heap with elements of type T
 ;; <? : T×T -> Bool.
+;; key: same purpose as in `sort'.
 ;; seq : sequence (list, vector, etc.) of elements of type T
-(define (make-heap <? [seq #f])
-  (define aheap (heap (make-vector MIN-SIZE #f) 0 <?))
+(define (make-heap <? [seq #f] #:key [extract-key #f])
+  (define aheap (heap (make-vector MIN-SIZE #f)
+                      0
+                      (if extract-key
+                          (λ(a b)(<? (extract-key a) (extract-key b)))
+                          <?)))
   (when seq
     (for ([x seq])
       (heap-insert! aheap x)))
