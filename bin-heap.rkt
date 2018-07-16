@@ -1,7 +1,7 @@
 #lang racket
 (require bazaar/debug)
 
-(provide make-heap heap-insert! heap-remove-min! heap-min)
+(provide make-heap heap-empty? heap-insert! heap-remove-min! heap-min)
 
 ;; Binary heap
 ;; https://www.cs.cmu.edu/~adamchik/15-121/lectures/Binary%20Heaps/heaps.html
@@ -71,6 +71,9 @@
   (match-define (heap hvec N <?) aheap)
   (assert (> N 0))
   (vector-ref hvec 1))
+
+(define (heap-empty? aheap)
+  (= (heap-N aheap) 0))
 
 ;; Removes the minimum element. If v is not #f, it is inserted in the heap at the same
 ;; time, which avoids one percolation round, and sometimes resizing.
