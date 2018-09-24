@@ -284,7 +284,7 @@
 
 ; When in a separate file, require like this:
 ; #lang racket/base
-; (require (planet orseau/racket/slideshow/styles/warsaw) ; replaces slideshow
+; (require bazaar/slideshow/warsaw) ; replaces slideshow
 
 (init-slide-style "My title" "Me and someone else")
 
