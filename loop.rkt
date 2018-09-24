@@ -46,9 +46,48 @@
    (values (cons (list i r) l) (+ sum r)))
   (list l sum))
 
-;; Like for, but returns the best element and its value when elements are compared with <?
+;; From the docs on for/fold/derived
+(define-syntax (for/max stx)
+  (syntax-case stx ()
+    [(_ clauses body ... tail-expr)
+     (with-syntax ([original stx])
+       #'(for/fold/derived original
+                           ([current-max -inf.0])
+                           clauses body ...
+                           (define maybe-new-max tail-expr)
+                           (if (> maybe-new-max current-max)
+                               maybe-new-max
+                               current-max)))]))
+
+(define-syntax (for/min stx)
+  (syntax-case stx ()
+    [(_ clauses body ... tail-expr)
+     (with-syntax ([original stx])
+       #'(for/fold/derived original
+                           ([current-max +inf.0])
+                           clauses body ...
+                           (define maybe-new-max tail-expr)
+                           (if (< maybe-new-max current-max)
+                               maybe-new-max
+                               current-max)))]))
+
+;; Like for, but returns the best element and its value when elements are compared with <?.
 ;; Each iteration must return the current element and its value (in this order).
-(define-syntax-rule (for/best <? (bindings ...) body ...)
+;; Returns the best value and the corresponding best element.
+(define-syntax (for/best stx)
+  (syntax-case stx ()
+    [(_ <? clauses body ... tail-expr)
+     (with-syntax ([original stx])
+       #'(for/fold/derived original
+                           ([best-elt no-elt] [best-val no-elt])
+                           clauses body ...
+                           (define-values (new-elt new-val) tail-expr)
+                           (if (or (eq? best-elt no-elt)
+                                   (<? new-val best-val))
+                               (values new-elt  new-val)
+                               (values best-elt best-val))))]))
+
+#;(define-syntax-rule (for/best <? (bindings ...) body ...)
   (for/fold ([best-elt no-elt] [best-val no-elt]) 
     (bindings ...)
     (let-values ([(new-elt new-val) 
