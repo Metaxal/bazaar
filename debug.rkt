@@ -24,7 +24,9 @@
          info-str
          ok
          time*
-         time*/seq)
+         time*/seq
+         with-proc-wrap
+         without-proc-wrap)
 
 ;;; See also Racket's log facility:
 ;;; http://docs.racket-lang.org/reference/logging.html
@@ -164,3 +166,45 @@
    'bloop
    'blip
    'blap))
+
+;; Wraps each procedure proc into a set of checks to fail as quickly as possible when one such check
+;; fails (the predicate returns true).
+;; Very convenient to catch as early as possible a calculation that produces a result that will lead
+;; to a failure later.
+(define-syntax-rule (with-proc-wrap (predicate? ...)
+                                    (proc ...)
+                                    body ...)
+  (let* ([wrap-op (λ(an-op op-sym)
+                    (λ l
+                      (define res (apply an-op l))
+                      (begin
+                        (when (predicate? res)
+                          (error "Check failed:" 'check: 'predicate? 'op: op-sym 'arguments l 'result: res))
+                        ...)
+                      res))]
+         [proc (wrap-op proc 'op)] ...)
+    body ...))
+
+;; Simply executs body ...
+;; Mere convenience to avoid commenting out with-wrap-op.
+(define-syntax-rule (without-proc-wrap (predicate? ...)
+                                       (op ...)
+                                       body ...)
+  (begin body ...))
+
+(module+ test
+  (require racket/math
+           racket/function)
+  
+  (check-not-exn (λ()
+                   (with-proc-wrap (nan? infinite? (negate real?))
+                                   (+ - / * )
+                                   
+                                   (+ 3 0.)))) ; doesn't fail
+  (check-exn exn:fail?
+             (λ()(with-proc-wrap (nan? infinite? (negate real?))
+                                 (+ - / * )
+                                 
+                                 (+ 3 0.) ; doesn't fail
+                                 (/ 3 0.)))) ; fails
+  )
