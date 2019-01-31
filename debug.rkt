@@ -175,14 +175,16 @@
                                     (proc ...)
                                     body ...)
   (let* ([wrap-op (λ(an-op op-sym)
-                    (λ l
-                      (define res (apply an-op l))
+                    (λ args
+                      (define res (apply an-op args))
                       (begin
                         (when (predicate? res)
-                          (error "Check failed:" 'check: 'predicate? 'op: op-sym 'arguments l 'result: res))
+                          (error "Check failed:"
+                                 (list 'predicate? (cons op-sym args))
+                                 "Result:" res))
                         ...)
                       res))]
-         [proc (wrap-op proc 'op)] ...)
+         [proc (wrap-op proc 'proc)] ...)
     body ...))
 
 ;; Simply executs body ...
