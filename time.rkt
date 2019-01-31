@@ -7,14 +7,16 @@
 ;; Returns the number of years, days, minutes and seconds as a list,
 ;; when given a number of seconds.
 ;; If annotated is not #f, the list contains symbol annotations for readablity.
-(define (seconds->duration secs #:annotated? [annotated? #f])
-    (define t secs)
-    (define s (modulo t 60))
-    (set! t (quotient t 60))
-    (define m (modulo t 60))
-    (set! t (quotient t 60))
-    (define d (modulo t 24))
-    (define a (quotient t 24))
-    (if annotated?
-        (list a 'years d 'days m 'minutes s 'seconds)
-        (list a d m s)))
+(define (milliseconds->duration secs #:annotated? [annotated? #f])
+  (define t secs)
+  (define ms (modulo t 1000))
+  (set! t (quotient t 1000))
+  (define s (modulo t 60))
+  (set! t (quotient t 60))
+  (define m (modulo t 60))
+  (set! t (quotient t 60))
+  (define d (modulo t 24))
+  (define a (quotient t 24))
+  (if annotated?
+      (list a 'years d 'days m 'minutes s 'seconds)
+      (list a d m s)))
