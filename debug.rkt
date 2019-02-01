@@ -41,7 +41,7 @@
 
 (define-syntax debug-var
   (syntax-parser 
-   [(_ var:id)
+   [(_ var:expr) #;(_ var:id)
     #'(printf "~a = ~v\n" 'var var)]))
 
 (define-syntax debug-var/line
