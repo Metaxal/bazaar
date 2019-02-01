@@ -17,20 +17,22 @@
   (set! t (quotient t 60))
   (define m (modulo t 60))
   (set! t (quotient t 60))
-  (define d (modulo t 24))
-  (define a (quotient t 24))
+  (define h (modulo t 24))
+  (set! t (quotient t 24))
+  (define d (modulo t 365))
+  (define y (quotient t 365))
   (case annotation
-    [(long) (list a 'years d 'days m 'minutes s 'seconds ms 'milliseconds)]
-    [(short) (list a 'y d 'd m 'm s 's ms 'ms)]
-    [else (list a d m s ms)]))
+    [(long) (list y 'years d 'days h 'hours m 'minutes s 'seconds ms 'milliseconds)]
+    [(short) (list y 'y d 'd h 'h m 'm s 's ms 'ms)]
+    [else (list y d h m s ms)]))
 
 (define (duration->milliseconds l)
-  (match-define (list a d m s ms) l)
-  (+ ms (* 1000 (+ s (* 60 (+ m (* 60 (+ d (* 24 a)))))))))
+  (match-define (list y d h m s ms) l)
+  (+ ms (* 1000 (+ s (* 60 (+ m (* 60 (+ h (* 24 (+ d (* y 365)))))))))))
 
 (module+ test
   (require rackunit)
-  (define dur (list (random 1000) (random 24) (random 60) (random 60) (random 1000)))
+  (define dur (list (random 1000) (random 365) (random 24) (random 60) (random 60) (random 1000)))
   (for ([i (in-range 100)])
     (check-equal? (milliseconds->duration (duration->milliseconds dur))
                   dur)))
