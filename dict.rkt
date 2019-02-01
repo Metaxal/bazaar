@@ -114,13 +114,13 @@
     #:before-first "("
     (for/list ([p ass])
       (string-append
-       "(" (~v (car p) #:min-width w #:pad-string " ")
+       "(" (~a (car p) #:min-width w #:pad-string " ")
        " . " (~out (cdr p)) ")"))
     "\n "
     #:after-last ")")))
 
 (define assoc-nice-print   (assoc-nice-output ~v))
-(define assoc-nice-write   (assoc-nice-output ~s))
+(define assoc-nice-write   (assoc-nice-output ~s)) ; This is probably the one you want
 (define assoc-nice-display (assoc-nice-output ~a))
 
 
