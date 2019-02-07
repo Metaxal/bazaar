@@ -6,6 +6,9 @@
 
 (provide (all-defined-out))
 
+(module+ test
+  (require rackunit))
+
 (define (string?-ci=? a b)
   (and (string? a) (string? b)
        (string-ci=? a b)))
@@ -22,10 +25,9 @@
 
 ;; Returns the lisp-like data contained in a string
 (define (string->data str)
-  (call-with-input-string
-   str
-   (λ(in) (let loop ([result '()])
-            (let ([v (read in)])
-              (if (eof-object? v)
-                  (reverse result)
-                  (loop (cons v result))))))))
+  (call-with-input-string str (λ(in)(port->list read in))))
+
+(module+ test
+  (check-equal? (string->data "((a)((\"bc\")(d . 5))) #(1 2 3)")
+                (list '((a) (("bc") (d . 5)))
+                      #(1 2 3))))
