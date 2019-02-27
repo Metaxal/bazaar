@@ -8,6 +8,10 @@
 (provide (all-defined-out)
          (all-from-out "../tree.rkt"))
 
+;;; Also see pict/tree-layout
+
+;;; A tree follows the (parent . children) representation.
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;   Drawing Trees   ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -84,15 +88,16 @@
    ))
 
 (module+ drracket
-  (define t1 '(a (b1 (c1 d1 d2) (c2 d3 d4)) 
-                 (b2 (c3 d5) c4)))
+  (current-font-size 12)
+  (define t1 '(a (b1 (c1 d1 d2) (c2 d3 d4 d5)) 
+                 (b2 (c3 d6) c4)))
   (define t1-t (tree-map t1 (λ(x)(t (symbol->string x)))))
   (displayln "top-down")
-  (draw-tree-top-down         t1-t 40 20)
+  (draw-tree-top-down         t1-t 20 10)
   (displayln "left-right")
   (draw-tree-left-right       t1-t 40 20)
   (displayln "left-right-down")
-  (draw-tree-left-right-down  t1-t 10 20)
+  (draw-tree-left-right-down  t1-t 50 0)
   (displayln "top-left-right")
-  (draw-tree-top-left-right   t1-t 10 20)
+  (draw-tree-top-left-right   t1-t 10 0)
   )
