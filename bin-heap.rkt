@@ -6,6 +6,7 @@
 ;; Binary heap
 ;; https://www.cs.cmu.edu/~adamchik/15-121/lectures/Binary%20Heaps/heaps.html
 ;; https://en.wikipedia.org/wiki/Binary_heap
+
 ;; Also see data/heap:
 ;; /usr/share/racket-7.0.0.1/pkgs/data-lib/data/heap.rkt
 

@@ -3,7 +3,7 @@
 ;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
 
-;;; Obsolete: There is a now a standalone 'text-table' package on pkgs.racket-lang.org
+;;; OBSOLETE: There is a now a standalone 'text-table' package on pkgs.racket-lang.org
 
 (require "loop.rkt"
          (only-in srfi/13 string-pad-right)

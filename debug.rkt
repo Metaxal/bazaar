@@ -116,7 +116,7 @@
     [(l) (check-proba-list l (current-check-precision))]
     [(l ε)
      (check-sum=1 l ε)
-     (for ([x l])
+     (for ([x (in-list l)])
        (check >= x 0.)
        (check <= x (+ 1. ε)))])) ; can be slightly larger than 1.??
 
