@@ -43,3 +43,19 @@
    (list (points l1)
          (function f)))
   )
+
+;; Willem's 'magic' sequence
+;; https://oeis.org/A006519
+(define (A6519 j)
+  (/ (+ 1 (bitwise-xor j (- j 1))) 2))
+
+(define willems A6519)
+
+;; Sequence used in Luby's scheduling, 'Reluctant doubling' as Knuth called it
+;; https://oeis.org/A182105
+(define (A182105 j)
+    (if (= (+ j 1) (A6519 (+ j 1)))
+        (/ (+ j 1) 2)
+        (luby (- (+ j 1) (expt 2 (exact-floor (log j 2)))))))
+
+(define luby A182105)
