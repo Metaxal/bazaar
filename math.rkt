@@ -7,6 +7,9 @@
 
 (provide (all-defined-out))
 
+(module+ test
+  (require rackunit))
+
 ;; DEPRECATED: Use the `sgn` function in racket/math or math/flonum
 (define (sign x)
   (cond [(< x 0) -1]
@@ -47,9 +50,13 @@
 ;; Willem's 'magic' sequence
 ;; https://oeis.org/A006519
 (define (A6519 j)
-  (/ (+ 1 (bitwise-xor j (- j 1))) 2))
+  (arithmetic-shift (+ 1 (bitwise-xor j (- j 1))) -1))
 
 (define willems A6519)
+
+(module+ test
+  (check-equal? (build-list 32 (compose A6519 add1))
+                '(1 2 1 4 1 2 1 8 1 2 1 4 1 2 1 16 1 2 1 4 1 2 1 8 1 2 1 4 1 2 1 32)))
 
 ;; Sequence used in Luby's scheduling, 'Reluctant doubling' as Knuth called it
 ;; https://oeis.org/A182105
@@ -59,3 +66,7 @@
         (luby (- (+ j 1) (expt 2 (exact-floor (log j 2)))))))
 
 (define luby A182105)
+
+(module+ test
+  (check-equal? (build-list 32 (compose A182105 add1))
+                '(1 1 2 1 1 2 4 1 1 2 1 1 2 4 8 1 1 2 1 1 2 4 1 1 2 1 1 2 4 8 16 1)))
