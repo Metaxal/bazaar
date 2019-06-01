@@ -45,14 +45,14 @@
     #'(printf "~a = ~v\n" 'var var)]))
 
 (define-syntax debug-var/line
-  (syntax-parser 
-   [(_ var:id)
+  (syntax-parser
+   [(_ var:expr)
     (with-syntax ([line (syntax-line #'var)])
       #'(printf "~a: ~a = ~v\n" line 'var var))]))
 
 (define-syntax debug-var/loc
   (syntax-parser 
-   [(_ var:id)
+   [(_ var:expr)
     (with-syntax ([line (syntax-line #'var)]
                   [pth (syntax-source-path-string #'var)])
       #'(printf "~a:~a ~a = ~v\n" pth line 'var var))]))
