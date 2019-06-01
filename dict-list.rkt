@@ -11,7 +11,8 @@
          dict-list-values
          dict-list-count
          dict-list-group-by
-         dict-list-count-by)
+         dict-list-count-by
+         dict-list->table)
 
 ;::::::::::::::::::::::::::::::;
 ;:: Dict-List data structure ::;
@@ -103,6 +104,34 @@
                 '((1 . 2) (2 . 2) (3 . 1)))
   )
 
+;; Turns a list of dictionaries into a table; the keys are inserted on the first line.
+;; The keys are kept in order of appearence.
+;; Possibly to be used in conjunction with text-table.
+(define no-arg (gensym))
+(define (dict-list->table dl #:absent [absent no-arg])
+  (define keys (remove-duplicates (append* (map dict-keys dl))))
+  (cons
+   keys
+   (for/list ([d (in-list dl)])
+     (map (λ(k)(if (eq? absent no-arg)
+                   (dict-ref d k)
+                   (dict-ref d k absent)))
+          keys))))
+
+(module+ test
+  (check-equal? (dict-list->table '(((a . 5) (b . "b") (c . c))
+                                    ((a . 6) (b . "b2") (d . d2))
+                                    ((e . eee)))
+                                  #:absent #f)
+                '((a b c d e)
+                  (5 "b" c #f #f)
+                  (6 "b2" #f d2 #f)
+                  (#f #f #f #f eee)))
+  (check-exn exn?
+             (λ()(dict-list->table '(((a . 5) (b . "b") (c . c))
+                                     ((a . 6) (b . "b2") (d . d2))
+                                     ((e . eee)))))))
+
 
 (module* stats #f
   (require math
@@ -165,3 +194,5 @@
                    (stats (filter positive? l))))))
   )
 ;;; See usage example at the end of "restarting-kt.rkt"
+
+
