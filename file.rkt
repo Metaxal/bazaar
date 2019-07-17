@@ -1,7 +1,4 @@
 #lang racket/base
-;;; Copyright (C) Laurent Orseau, 2010-2013
-;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
-
 (require racket/file
          racket/list
          racket/string
@@ -91,3 +88,10 @@
   (display-lines (file->lines f))
   )
 ;|#
+
+;; Retuns the first lines of the file f as a list of strings
+(define (file-head f [n-lines 10])
+  (with-input-from-file f
+    (λ()(for/list ([line (in-lines)]
+                   [i (in-range n-lines)])
+          line))))
