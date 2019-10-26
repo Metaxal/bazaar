@@ -241,5 +241,19 @@
 (module+ test
   (let ([l (build-list 100 (λ(i)(random 100)))])
     (check-equal? (sort (remove-duplicates l) <)
-                (remove-duplicates-sorted (sort l <))))
-  )
+                (remove-duplicates-sorted (sort l <)))))
+
+(define (take-at-most l n)
+  (for/list ([x (in-list l)]
+             [i (in-range n)])
+    x))
+
+(module+ test
+  (check-equal? (take-at-most '(a b c d) 10)
+                '(a b c d))
+  (check-equal? (take-at-most '(a b c d) 2)
+                '(a b))
+  (check-equal? (take-at-most '(a b c d) 0)
+                '())
+  (check-equal? (take-at-most '() 2)
+                '()))
