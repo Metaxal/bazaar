@@ -9,7 +9,8 @@
          "base.rkt"
          )
 
-(provide debug-var
+(provide debug-line
+         debug-var
          debug-vars
          debug-vars/line
          debug-vars/loc
@@ -43,6 +44,12 @@
   (syntax-parser 
    [(_ var:expr) #;(_ var:id)
     #'(printf "~a = ~v\n" 'var var)]))
+
+(define-syntax debug-line
+  (syntax-parser
+   [(stx )
+    (with-syntax ([line (syntax-line #'stx)])
+      #'(printf "Line ~a\n" line))]))
 
 (define-syntax debug-var/line
   (syntax-parser
