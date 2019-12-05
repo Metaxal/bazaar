@@ -257,3 +257,29 @@
                 '())
   (check-equal? (take-at-most '() 2)
                 '()))
+
+;; A short-hand for the many cases where one has to process a list recursively
+(define-simple-macro (if-empty-first [l:expr x:id] [empty-body ...] [first-body ...])
+  (let ([l2 l]) ; in case l is an expression
+    (if (empty? l2)
+        (let ()
+          empty-body ...)
+        (let ([x (first l2)])
+          first-body ...))))
+
+(module+ test
+  (check-equal?
+   (let ([a 0])
+     (if-empty-first
+      [(let () (set! a (+ a 1)) (list a 2 3)) y]
+      [(error "a")]
+      [(define x (list 0 y))
+       x]))
+   '(0 1))
+  (check-equal?
+   (let loop ([l '(3 4 5)])
+     (if-empty-first
+      [l x]
+      ['(a)]
+      [(cons (- x) (loop (rest l)))]))
+   '(-3 -4 -5 a)))
