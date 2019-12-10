@@ -2,7 +2,8 @@
 ;;; Copyright (C) Laurent Orseau, 2010-2013
 ;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
-(require (for-syntax racket/base))
+(require (for-syntax racket/base)
+         syntax/parse/define)
 
 (provide (all-defined-out))
 
@@ -121,3 +122,61 @@
               (define y (- 3 x))
               (values x y))))
   )
+
+
+;; Zips the list l from left to right. At each step of the loop, the bindings
+;; rev-left, x and next-right 
+(define-simple-macro (zip-loop ([(rev-left:id x:id next-right:id) l:expr]
+                                [res:id v0:expr] ...)
+                               body ...)
+  (let loop ([rev-left '()] [right l] [res v0] ...)
+    (if (null? right)
+        (values res ...)
+        (let ([x (car right)]
+              [next-right (cdr right)])
+          (let-values ([(res ...) (let () body ...)])
+            (loop (cons x rev-left) next-right res ...))))))
+
+; Example
+#;#;#;
+(zip-loop ([(rl x r) '(a b c d e)] [res '()] [i 0])
+          (values (cons (list i ': rl x r) res)
+                  (+ i 1)))
+'((4 : (d c b a) e ())
+  (3 : (c b a) d (e))
+  (2 : (b a) c (d e))
+  (1 : (a) b (c d e))
+  (0 : () a (b c d e)))
+5
+
+(module+ test
+  (require racket/list)
+  (let ([the-list (range 10)])
+    (check-equal?
+     (values->list
+      (zip-loop ([(rl x r) the-list] [z1 '()] [z2 0])
+                (values (cons x z1)
+                        (+ x z2))))
+     (list (reverse the-list)
+           (apply + the-list)))))
+
+
+(module+ main
+  (require racket)
+  (define l (range 1000))
+
+  ; generate all pairs of unordered indices
+  ; (that is, (x_1 x_2) is produced, but not (x_2 x_1))
+  (collect-garbage)(collect-garbage)
+  ; 56ms for l=(range 1000) (fast!)
+  (time
+   (length
+    (zip-loop ([(rl x r) l] [res '()])
+              (zip-loop ([(rl2 x2 r2) r] [res2 res])
+                        (cons (list x x2) res2)))))
+
+  (collect-garbage)(collect-garbage)
+  ; 8500ms (!!)
+  (time
+   (length (combinations l 2))))
+
