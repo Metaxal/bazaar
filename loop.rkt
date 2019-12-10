@@ -125,23 +125,68 @@
 
 
 ;; Zips the list l from left to right. At each step of the loop, the bindings
-;; rev-left, x and next-right 
-(define-simple-macro (zip-loop ([(rev-left:id x:id next-right:id) l:expr]
-                                [res:id v0:expr] ...)
-                               body ...)
-  (let loop ([rev-left '()] [right l] [res v0] ...)
-    (if (null? right)
-        (values res ...)
-        (let ([x (car right)]
-              [next-right (cdr right)])
-          (let-values ([(res ...) (let () body ...)])
-            (loop (cons x rev-left) next-right res ...))))))
+;; rev-left, x and next-right.
+;; Accepts any number of fold (for/fold-like) variables. The number of values returned
+;; by the body must match the number of fold variables.
+;; rev-left is in reverse order to avoid the cost of reversing if it is not necessary
+;; (by contrast to for/list).
+;; `zip-loop` is tail-recursive.
+;; If the rev-left binding is not provided, it is also not constructed for efficiency.
+;; (this is then not exactly zipping, put provides a consistent interface.)
+;; If no fold variables are used, `zip-loop` returns void.
+;; Note: In DrRacket, do Edit > Preferences > Editing > Indenting, in Lambda-like keywords,
+;; add zip-loop.
+(define-syntax-parser zip-loop
+  
+  [(zip-loop ([(x:id next-right:id) l:expr])
+     body ...)
+   ; no rev-left, no fold variables
+   #'(let loop ([right l])
+       (unless (null? right)
+         (let ([x (car right)]
+               [next-right (cdr right)])
+           body ...
+           (loop next-right))))]
+  
+  [(zip-loop ([(x:id next-right:id) l:expr]
+              [res:id v0:expr] ...)
+     body ...)
+   ; no rev-left, fold variables
+   #'(let loop ([right l] [res v0] ...)
+       (if (null? right)
+           (values res ...)
+           (let ([x (car right)]
+                 [next-right (cdr right)])
+             (let-values ([(res ...) (let () body ...)])
+               (loop next-right res ...)))))]
+  
+  [(zip-loop ([(rev-left:id x:id next-right:id) l:expr])
+     body ...)
+   ; rev-left, no fold variables
+   #'(let loop ([rev-left '()] [right l])
+       (unless (null? right)
+         (let ([x (car right)]
+               [next-right (cdr right)])
+           body ...
+           (loop (cons x rev-left) next-right))))]
 
-; Example
+  [(zip-loop ([(rev-left:id x:id next-right:id) l:expr]
+              [res:id v0:expr] ...)
+     body ...)
+   ; rev-left, fold-variables
+   #'(let loop ([rev-left '()] [right l] [res v0] ...)
+       (if (null? right)
+           (values res ...)
+           (let ([x (car right)]
+                 [next-right (cdr right)])
+             (let-values ([(res ...) (let () body ...)])
+               (loop (cons x rev-left) next-right res ...)))))])
+
+; Example. `res` and `i` are for/fold-like variables
 #;#;#;
 (zip-loop ([(rl x r) '(a b c d e)] [res '()] [i 0])
-          (values (cons (list i ': rl x r) res)
-                  (+ i 1)))
+  (values (cons (list i ': rl x r) res)
+          (+ i 1)))
 '((4 : (d c b a) e ())
   (3 : (c b a) d (e))
   (2 : (b a) c (d e))
@@ -149,8 +194,22 @@
   (0 : () a (b c d e)))
 5
 
+;; Note: `rev-append` (bazaar/list) is particularly useful to do (rev-append rev-left right)
+;; and restore the original sequence while avoid unnecessary reversals.
+;; Ex: All subsets of (range 10) with only a single element missing:
+#;(zip-loop ([(rl x r) (range 10)] [res '()])
+    (cons (rev-append rl r)
+          res)) 
+;; Same with 2 elements missing:
+#;(zip-loop ([(rl x r) (range 10)] [res '()])
+    (zip-loop ([(rl2 x2 r2) r] [res res])
+      (cons (rev-append rl (rev-append rl2 r2))
+            res)))
+
+
 (module+ test
   (require racket/list)
+
   (let ([the-list (range 10)])
     (check-equal?
      (values->list
@@ -158,22 +217,47 @@
                 (values (cons x z1)
                         (+ x z2))))
      (list (reverse the-list)
-           (apply + the-list)))))
+           (apply + the-list))))
+  
+  (check-equal?
+   (zip-loop ([(rl x r) '()] [res 'a])
+             3)
+   'a)
+
+  (check equal?
+         (zip-loop ([(rl x r) (range 5)])
+                   'a)
+         (void))
+  (check-equal?
+   (let ([s 0])
+     (zip-loop ([(rl x r) (range 5)])
+               (set! s (+ s x)))
+     s)
+   (apply + (range 5)))
+  )
 
 
 (module+ main
   (require racket)
-  (define l (range 1000))
+  (define l (range 10000))
 
   ; generate all pairs of unordered indices
   ; (that is, (x_1 x_2) is produced, but not (x_2 x_1))
+  (collect-garbage)(collect-garbage)
+  ; 36ms for l=(range 1000) (fast!)
+  (time
+   (length
+    (zip-loop ([(x r) l] [res '()])
+      (zip-loop ([(x2 r2) r] [res2 res])
+        (cons (list x x2) res2)))))
+  
   (collect-garbage)(collect-garbage)
   ; 56ms for l=(range 1000) (fast!)
   (time
    (length
     (zip-loop ([(rl x r) l] [res '()])
-              (zip-loop ([(rl2 x2 r2) r] [res2 res])
-                        (cons (list x x2) res2)))))
+      (zip-loop ([(rl2 x2 r2) r] [res2 res])
+        (cons (list x x2) res2)))))
 
   (collect-garbage)(collect-garbage)
   ; 8500ms (!!)
