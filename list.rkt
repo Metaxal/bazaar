@@ -18,6 +18,26 @@
 (define (choose l)
   (list-ref l (random (length l))))
 
+;; Fast version of append that reverses the order of the elements of l1 into l2.
+;; Useful when l1 is known to be reversed already.
+;; It is most efficient when l1 is shorter than l2.
+(define (rev-append l1 l2)
+  (if (null? l1)
+      l2
+      (rev-append (cdr l1) (cons (car l1) l2))))
+
+(module+ test
+  (check-equal? (rev-append '() '())
+                '())
+  (check-equal? (rev-append '(a b c) '(1 2 3))
+                '(c b a 1 2 3))
+  (check-equal? (rev-append '() '(1 2 3))
+                '(1 2 3))
+  (check-equal? (rev-append '(a b c) '())
+                '(c b a))
+  (check-equal? (rev-append '() '(a b c))
+                '(a b c)))
+
 ;; Returns the index and value of the >?-maximal element of l.
 ;; l must be a non-empty list.
 ;; Use >= instead of > to retrieve the last index
@@ -258,8 +278,9 @@
   (check-equal? (take-at-most '() 2)
                 '()))
 
-;; A short-hand for the many cases where one has to process a list recursively
-(define-simple-macro (if-empty-first [l:expr x:id] [empty-body ...] [first-body ...])
+;; A short-hand for the many cases where one has to process a list recursively.
+;; See also `zip-loop` in loop.rkt
+(define-simple-macro (if-empty-first [l:expr x:id] {empty-body ...} {first-body ...})
   (let ([l2 l]) ; in case l is an expression
     (if (empty? l2)
         (let ()
@@ -271,15 +292,16 @@
   (check-equal?
    (let ([a 0])
      (if-empty-first
-      [(let () (set! a (+ a 1)) (list a 2 3)) y]
-      [(error "a")]
-      [(define x (list 0 y))
-       x]))
+      {(let () (set! a (+ a 1)) (list a 2 3)) y}
+      {(error "a")}
+      {(define x (list 0 y))
+       x}))
    '(0 1))
+  
   (check-equal?
    (let loop ([l '(3 4 5)])
      (if-empty-first
       [l x]
-      ['(a)]
-      [(cons (- x) (loop (rest l)))]))
+      {'(a)}
+      {(cons (- x) (loop (rest l)))}))
    '(-3 -4 -5 a)))
