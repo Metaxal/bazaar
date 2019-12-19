@@ -24,9 +24,7 @@
 (define (tree-map tree leaf-proc [node-proc identity])
   (let loop ([tree tree])
     (if (list? tree)
-      (cons (node-proc (loop (first tree)))
-            (map (λ(t)(loop t))
-                 (rest tree)))
+      (node-proc (map loop tree))
       (leaf-proc tree))))
 
 ;; node-proc: (not/c list?) int -> any/c
@@ -35,27 +33,18 @@
 (define (tree-map/depth tree leaf-proc [node-proc identity])
   (let loop ([tree tree] [depth 0])
     (if (list? tree)
-        (map (λ(t)(node-proc (loop t (add1 depth))))
-             tree)
+        (node-proc
+         (map (λ(t)(loop t (add1 depth)))
+              tree))
         (leaf-proc tree depth))))
 
-(define (tree-for-each tree leaf-proc [node-proc leaf-proc])
+(define (tree-for-each tree leaf-proc [node-proc void])
   (let loop ([tree tree])
     (if (list? tree)
         (begin (node-proc tree)
                (for-each loop tree))
         (void (leaf-proc tree)))))
 
-; like fold but for trees, where the initial values are leaf values (modified by leaf-proc)
-; node-proc accumulates the children return values
-; tree-fold : tree . node-proc . node-value -> return-value
-; node-proc : node-value . (list return-value) -> return-value
-; leaf-proc : leaf-value -> return-value
-(define (tree-fold tree node-proc [leaf-proc values])
-  (if (list? tree)
-      (node-proc (first tree) (map (λ(tree)(tree-fold tree node-proc leaf-proc))
-                                   (rest tree)))
-      (leaf-proc tree)))
 
 (define (subtree tree n)
   (first
