@@ -2,12 +2,13 @@
 ;;; Copyright (C) Laurent Orseau, 2010-2013
 ;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
-(require (for-syntax racket/base)
+(require (for-syntax racket/base
+                     racket/syntax)
          syntax/parse/define)
 
 (provide (all-defined-out))
 
-(module+ test (require "rackunit.rkt" "values.rkt"))
+(module+ test (require racket "rackunit.rkt" "values.rkt"))
 
 (define-syntax-rule (while test body ...)
   (let loop ()
@@ -130,57 +131,91 @@
 ;; by the body must match the number of fold variables.
 ;; rev-left is in reverse order to avoid the cost of reversing if it is not necessary
 ;; (by contrast to for/list).
+;; if the break expression is not #f, the loop terminates immediately and the return values are
+;; returned.
+;; If #:result is used, it becomes the return value when the loop terminates. (The res ... bindings
+;; are available.)
 ;; `zip-loop` is tail-recursive.
 ;; If the rev-left binding is not provided, it is also not constructed for efficiency.
 ;; (this is then not exactly zipping, put provides a consistent interface.)
 ;; If no fold variables are used, `zip-loop` returns void.
 ;; Note: In DrRacket, do Edit > Preferences > Editing > Indenting, in Lambda-like keywords,
 ;; add zip-loop.
-(define-syntax-parser zip-loop
-  
-  [(zip-loop ([(x:id next-right:id) l:expr])
-     body ...)
-   ; no rev-left, no fold variables
-   #'(let loop ([right l])
-       (unless (null? right)
-         (let ([x (car right)]
-               [next-right (cdr right)])
-           body ...
-           (loop next-right))))]
-  
-  [(zip-loop ([(x:id next-right:id) l:expr]
-              [res:id v0:expr] ...)
-     body ...)
-   ; no rev-left, fold variables
-   #'(let loop ([right l] [res v0] ...)
-       (if (null? right)
-           (values res ...)
-           (let ([x (car right)]
-                 [next-right (cdr right)])
-             (let-values ([(res ...) (let () body ...)])
-               (loop next-right res ...)))))]
-  
-  [(zip-loop ([(rev-left:id x:id next-right:id) l:expr])
-     body ...)
-   ; rev-left, no fold variables
-   #'(let loop ([rev-left '()] [right l])
-       (unless (null? right)
-         (let ([x (car right)]
-               [next-right (cdr right)])
-           body ...
-           (loop (cons x rev-left) next-right))))]
+(define-syntax (zip-loop stx)
+  (syntax-parse stx
+    [(_ ([((~optional rev-left1:id) x1:id right1:id) l1:expr]
+         [res:id v0:expr] ...
+         (~alt (~optional (~seq #:result result:expr)
+                          #:defaults ([result #'(values res ...)]))
+               (~optional (~seq #:break break:expr)))
+         ...)
+        body ...)
+     #`(let loop ((~? (~@ [rev-left1 '()]))
+                  [pre-right1 l1]
+                  [res v0] ...)
+         (if (null? pre-right1)
+             result
+             (let ([x1 (car pre-right1)]
+                   [right1 (cdr pre-right1)])
+               #,(with-syntax* ([let-vals-bindings (if (null? (syntax-e #'(res ...)))
+                                                       #'([() (let () body ... (values))])
+                                                       #'([(res ...) (let () body ...)]))]
+                                [do-loop #'(let-values let-vals-bindings
+                                             (loop (~? (~@ (cons x1 rev-left1))) right1
+                                                   res ...))])
+                   (if (attribute break)
+                       #'(let ([break-val break])
+                           (if break
+                               result
+                               do-loop))
+                       #'do-loop)))))]))
 
-  [(zip-loop ([(rev-left:id x:id next-right:id) l:expr]
-              [res:id v0:expr] ...)
-     body ...)
-   ; rev-left, fold-variables
-   #'(let loop ([rev-left '()] [right l] [res v0] ...)
-       (if (null? right)
-           (values res ...)
-           (let ([x (car right)]
-                 [next-right (cdr right)])
-             (let-values ([(res ...) (let () body ...)])
-               (loop (cons x rev-left) next-right res ...)))))])
+(module+ test
+  (let ([l (range 10)] [resl '(8 6 4 2 0)])
+    (check-equal?
+     (zip-loop ([(rl x r) l] [res '()])
+       (if (even? x) (cons x res) res))
+     resl)
+    
+    (check-equal?
+     (zip-loop ([(x r) l] [res '()])
+       (if (even? x) (cons x res) res))
+     resl)
+    
+    (check-equal?
+     (let ([res '()])
+       (zip-loop ([(x r) l])
+         (when (even? x) (set! res (cons x res))))
+       res)
+     resl)
+    
+    (check-equal?
+     (let ([res '()])
+       (zip-loop ([(lr x r) l])
+         (when (even? x) (set! res (cons x res))))
+       res)
+     resl)
+    
+    (check-equal?
+     (zip-loop ([(rl x r) l]
+                [res '()]
+                [i 0]
+                #:break (= i 5)
+                #:result (list i res))
+       (values (if (even? x) (cons x res) res)
+               (+ i 1)))
+     '(5 (4 2 0)))
+    
+    (check-equal?
+     (zip-loop ([(rl x r) l]
+                [res '()]
+                [i 0]
+                #:result (list i res)
+                #:break (= x 5))
+       (values (if (even? x) (cons x res) res)
+               (+ i 1)))
+     '(5 (4 2 0)))
+    ))
 
 ; Example. `res` and `i` are for/fold-like variables
 #;#;#;
@@ -225,9 +260,10 @@
    'a)
 
   (check equal?
-         (zip-loop ([(rl x r) (range 5)])
-                   'a)
-         (void))
+         (values->list
+          (zip-loop ([(rl x r) (range 5)])
+            'a))
+         '()) ; no values
   (check-equal?
    (let ([s 0])
      (zip-loop ([(rl x r) (range 5)])
@@ -239,12 +275,14 @@
 
 (module+ main
   (require racket)
-  (define l (range 10000))
+  (displayln "zip-loop example vs combinations")
+  (define l (range 2000))
 
   ; generate all pairs of unordered indices
   ; (that is, (x_1 x_2) is produced, but not (x_2 x_1))
   (collect-garbage)(collect-garbage)
-  ; 36ms for l=(range 1000) (fast!)
+  ; 366ms for l=(range 2000) (fast!)
+  ; fast, but almost everything is garbage collection
   (time
    (length
     (zip-loop ([(x r) l] [res '()])
@@ -252,7 +290,8 @@
         (cons (list x x2) res2)))))
   
   (collect-garbage)(collect-garbage)
-  ; 56ms for l=(range 1000) (fast!)
+  ; 397ms for l=(range 2000)
+  ; same as above
   (time
    (length
     (zip-loop ([(rl x r) l] [res '()])
@@ -260,7 +299,8 @@
         (cons (list x x2) res2)))))
 
   (collect-garbage)(collect-garbage)
-  ; 8500ms (!!)
+  ; 63644ms for l=(range 2000)
+  ; very slow, but no garbage collection in proportion.
   (time
    (length (combinations l 2))))
 
