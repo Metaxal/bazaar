@@ -4,7 +4,8 @@
 
 (require "list.rkt"
          "mutation.rkt"
-         racket/list)
+         racket/list
+         racket/function)
 
 (provide (all-defined-out))
 
@@ -20,29 +21,30 @@
 
 
 ; Depth-first iteration
-(define (tree-map tree node-proc [leaf-proc node-proc])
-  (if (list? tree)
-      (cons (node-proc (first tree)) (map (λ(t)(tree-map t node-proc leaf-proc))
-                                          (rest tree)))
-      (leaf-proc tree)))
+(define (tree-map tree leaf-proc [node-proc identity])
+  (let loop ([tree tree])
+    (if (list? tree)
+      (cons (node-proc (loop (first tree)))
+            (map (λ(t)(loop t))
+                 (rest tree)))
+      (leaf-proc tree))))
 
 ;; node-proc: (not/c list?) int -> any/c
 ;; leaf-proc: (not/c list?) int -> any/c
 ;; The second argument is the depth, which is 0 for the root.
-(define (tree-map/depth tree node-proc [leaf-proc node-proc])
+(define (tree-map/depth tree leaf-proc [node-proc identity])
   (let loop ([tree tree] [depth 0])
     (if (list? tree)
-        (cons (node-proc (first tree) depth)
-              (map (λ(t)(loop t (add1 depth)))
-                   (rest tree)))
+        (map (λ(t)(node-proc (loop t (add1 depth))))
+             tree)
         (leaf-proc tree depth))))
 
-(define (tree-for-each tree node-proc [leaf-proc node-proc])
-  (if (list? tree)
-      (begin (node-proc (first tree))
-             (for-each (λ(t)(tree-for-each t node-proc leaf-proc))
-                       (rest tree)))
-      (void (leaf-proc tree))))
+(define (tree-for-each tree leaf-proc [node-proc leaf-proc])
+  (let loop ([tree tree])
+    (if (list? tree)
+        (begin (node-proc tree)
+               (for-each loop tree))
+        (void (leaf-proc tree)))))
 
 ; like fold but for trees, where the initial values are leaf values (modified by leaf-proc)
 ; node-proc accumulates the children return values

@@ -91,7 +91,7 @@
   (current-font-size 12)
   (define t1 '(a (b1 (c1 d1 d2) (c2 d3 d4 d5)) 
                  (b2 (c3 d6) c4)))
-  (define t1-t (tree-map t1 (λ(x)(t (symbol->string x)))))
+  (define t1-t (tree-map t1 (λ(x)(t (symbol->string x))) identity))
   (displayln "top-down")
   (draw-tree-top-down         t1-t 20 10)
   (displayln "left-right")
