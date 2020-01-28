@@ -16,7 +16,9 @@
            math/number-theory))
 
 (define (choose l)
-  (list-ref l (random (length l))))
+  (if (empty? l)
+      (error "List must not be empty")
+      (list-ref l (random (length l)))))
 
 ;; Fast version of append that reverses the order of the elements of l1 into l2.
 ;; Useful when l1 is known to be reversed already.
