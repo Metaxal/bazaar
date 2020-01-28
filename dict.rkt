@@ -13,7 +13,9 @@
          occurrences
          assoc-nice-print
          assoc-nice-write
-         assoc-nice-display)
+         assoc-nice-display
+         get-key
+         is-key)
 
 (module+ test 
   (require rackunit))
@@ -150,3 +152,38 @@
  (nb-models         . 38413)
  (ctx-length-max    . 10))
 
+(define ((get-key key [default (λ()(error "key not found" key))]) d)
+  (dict:dict-ref d key default))
+
+(module+ test
+  (check-equal?
+   (map (get-key 'time)
+        '( [(solved? . #t) (time . 12345)]
+           [(solved? . #t) (time . 234)]
+           [(solved? . #f) (time . 90000)]))
+   '(12345 234 90000)))
+
+#;
+(define ((is-key key val [=? equal?] [default (λ()(error "key not found" key))]) d)
+  (=? (dict:dict-ref d key default)
+      val))
+
+(define is-key
+  (let ([proc (λ (key val =? default)
+                (λ (d)
+                  (=? (dict:dict-ref d key default)
+                      val)))]
+        [=? equal?]
+        [default (λ () (error "key not found"))])
+    (case-lambda
+      [(key val)             (proc key val =? default)]
+      [(key =? val)          (proc key val =? default)] ; so that order is easy to read
+      [(key =? val default)  (proc key val =? default)])))
+
+(module+ test
+  (check-equal?
+   (filter (is-key 'time < 1000)
+           '( [(solved? . #t) (time . 12345)]
+              [(solved? . #t) (time . 234)]
+              [(solved? . #f) (time . 90000)]))
+   '([(solved? . #t) (time . 234)])))
