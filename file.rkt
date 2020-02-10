@@ -100,19 +100,22 @@
 ;; read-data-thunk takes no argument and must return a single value that must be
 ;; writable to and readable from a file.
 ;; This value is stored in cache-file for faster loading next time.
-;; If cache-file is younger that data-file, it loads the data from cache-file
-;; directly and read-data-thunk is not called.
+;; If cache-file is younger that data-file or force? is not #f,
+;; it loads the data from cache-file directly and read-data-thunk is not called.
 ;; If cache-file does not exist or is older than data-file, read-data-thunk
 ;; is called as data-file is opened for input, and the result of the thunk
 ;; is both returned and written into cache-file.
 (define (with-input-from-file/cache data-file
           read-data-thunk
-          #:cache-path [cache-file (path-add-extension data-file #".cache")]
+          #:force? [force? #f]
+          #:cache-extension [cache-extension #".cache"]
+          #:cache-path [cache-file (path-add-extension data-file cache-extension)]
           #:verbose? [verbose? #t])
   (assert (file-exists? data-file) data-file)
   (assert (procedure-arity-includes? read-data-thunk 0))
   (cond
-    [(or (not (file-exists? cache-file))
+    [(or force?
+         (not (file-exists? cache-file))
          (< (file-or-directory-modify-seconds cache-file)
             (file-or-directory-modify-seconds data-file)))
      (when verbose?
