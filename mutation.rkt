@@ -51,3 +51,8 @@
 
 (define-simple-macro (surround! l str:id r)
   (set! str (string-append l str r)))
+
+;;; General case
+
+(define-simple-macro (update! var:id proc:expr)
+  (set! var (proc var)))
