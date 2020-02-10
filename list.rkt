@@ -40,6 +40,11 @@
   (check-equal? (rev-append '() '(a b c))
                 '(a b c)))
 
+(define (fmax l [f values])
+  (for/fold ([fxmax -inf.0])
+            ([x (in-list l)])
+    (max (f x) fxmax)))
+
 ;; Returns the index and value of the >?-maximal element of l.
 ;; l must be a non-empty list.
 ;; Use >= instead of > to retrieve the last index
