@@ -31,7 +31,7 @@
                                            (procedure-arity-includes? on-error 1))
                                       on-error
                                       (λ (e) on-error))])
-    (call-with-input-string str (λ(in)(port->list read in)))))
+    (call-with-input-string str (λ (in) (port->list read in)))))
 
 (module+ test
   (check-equal? (string->data "((a)((\"bc\")(d . 5))) #(1 2 3)")
