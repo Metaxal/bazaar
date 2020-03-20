@@ -47,3 +47,31 @@
 (define (vector-normalize! v)
   (define sum (for/sum ([x (in-vector v)]) x))
   (vector-map! (λ(x)(/ x sum)) v))
+
+;; Renaming the built-in vector-argmin to vector-min,
+;; defaulting to returning just the minimum value in the vector
+;; proc: any/c -> real
+(define (vector-min vec [proc values])
+  (vector-argmin proc vec))
+
+;; Returns the index of the first minimum element in the vector according
+;; to proc.
+;; proc: any/c -> real
+;; Returns #f if the vector is empty
+;; Should be named vector-argmin, but it is already defined.
+(define (vector-min-index vec [proc values])
+  (for/fold ([best-index #f]
+             [best-value +inf.0]
+             #:result best-index)
+            ([x (in-vector vec)]
+             [i (in-naturals)])
+    (define v (proc x))
+    (if (< v best-value)
+        (values i v)
+        (values best-index best-value))))
+
+(module+ test
+  (check-equal? (vector-min-index #(1 2 0 5 3 4))
+                2)
+  (check-equal? (vector-min-index #(1 2 0 5 3 4) -)
+                3))
