@@ -75,3 +75,23 @@
                 2)
   (check-equal? (vector-min-index #(1 2 0 5 3 4) -)
                 3))
+
+;; Like `vector-min-index` but also returns the value
+;; like `vector-min`.
+(define (vector-min+index vec [proc values])
+  (for/fold ([best-value +inf.0]
+             [best-index #f])
+            ([x (in-vector vec)]
+             [i (in-naturals)])
+    (define v (proc x))
+    (if (< v best-value)
+        (values v i)
+        (values best-value best-index))))
+
+(module+ test
+  (check-equal? (let-values ([(v i) (vector-min+index #(1 2 0 5 3 4))])
+                  (list v i))
+                '(0 2))
+  (check-equal? (let-values ([(v i) (vector-min+index #(1 2 0 5 3 4) -)])
+                  (list v i))
+                '(-5 3)))
