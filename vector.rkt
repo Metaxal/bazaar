@@ -48,50 +48,52 @@
   (define sum (for/sum ([x (in-vector v)]) x))
   (vector-map! (λ(x)(/ x sum)) v))
 
-;; Renaming the built-in vector-argmin to vector-min,
-;; defaulting to returning just the minimum value in the vector
-;; proc: any/c -> real
-(define (vector-min vec [proc values])
-  (vector-argmin proc vec))
-
-;; Returns the index of the first minimum element in the vector according
-;; to proc.
-;; proc: any/c -> real
-;; Returns #f if the vector is empty
-;; Should be named vector-argmin, but it is already defined.
-(define (vector-min-index vec [proc values])
-  (for/fold ([best-index #f]
-             [best-value +inf.0]
-             #:result best-index)
-            ([x (in-vector vec)]
-             [i (in-naturals)])
-    (define v (proc x))
-    (if (< v best-value)
-        (values i v)
-        (values best-index best-value))))
-
-(module+ test
-  (check-equal? (vector-min-index #(1 2 0 5 3 4))
-                2)
-  (check-equal? (vector-min-index #(1 2 0 5 3 4) -)
-                3))
-
-;; Like `vector-min-index` but also returns the value
-;; like `vector-min`.
-(define (vector-min+index vec [proc values])
-  (for/fold ([best-value +inf.0]
-             [best-index #f])
-            ([x (in-vector vec)]
-             [i (in-naturals)])
-    (define v (proc x))
-    (if (< v best-value)
+;; Returns the best value (key x) of the elements x of the vector vec,
+;; along with its corresponding index in the vector.
+;; Values are compared with `better?`---if `(better? a b)` is not `#f` this
+;; means that `a` is better than `b`.
+;; The vector vec is assumed non-empty.
+;; vec : non-empty-vector?
+;; better? : T T -> boolean?
+;; key? : any/c -> T
+(define (vector-best+index vec better? #:key [key values])
+  (for/fold ([best-value (key (vector-ref vec 0))]
+             [best-index 0])
+            ([x (in-vector vec 1)]
+             [i (in-naturals 1)])
+    (define v (key x))
+    (if (better? v best-value)
         (values v i)
         (values best-value best-index))))
 
 (module+ test
-  (check-equal? (let-values ([(v i) (vector-min+index #(1 2 0 5 3 4))])
-                  (list v i))
+  (check-equal? (call-with-values (λ () (vector-best+index #(1 2 0 5 3 4) <))
+                                  list)
                 '(0 2))
-  (check-equal? (let-values ([(v i) (vector-min+index #(1 2 0 5 3 4) -)])
-                  (list v i))
+  (check-equal? (call-with-values (λ () (vector-best+index #(1 2 0 5 3 4) >))
+                                  list)
+                '(5 3))
+  (check-equal? (call-with-values (λ () (vector-best+index #(1 2 0 5 3 4) < #:key -))
+                                  list)
                 '(-5 3)))
+
+;; Like `vector-best+index` but returns only the best element (not its index)
+(define (vector-best vec better? #:key [key values])
+  (define-values (best index)
+    (vector-best+index vec better? #:key key))
+  best)
+
+;; Like `vector-best+index` but returns only the index (not the element)
+(define (vector-best-index vec better? #:key [key values])
+  (define-values (best index)
+    (vector-best+index vec better? #:key key))
+  index)
+
+(module+ test
+  (check-equal? (vector-best-index #(1 2 0 5 3 4) <)
+                2)
+  (check-equal? (vector-best-index #(1 2 0 5 3 4) < #:key -)
+                3))
+
+
+
