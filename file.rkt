@@ -3,7 +3,8 @@
          racket/list
          racket/string
          racket/path
-         bazaar/debug)
+         bazaar/debug
+         syntax/modread) ; for properly reading modules
 
 (provide (all-defined-out))
 
@@ -127,3 +128,13 @@
      (write-to-file D cache-file #:exists 'replace)
      D]
     [else (file->value cache-file)]))
+
+;; Returns the s-exp corresponding to the (first) value in f,
+;; even if it is a module.
+;; Assumes the file f exists.
+(define (file/module->value f)
+  (with-input-from-file f
+    (λ ()
+      (port-count-lines! (current-input-port))
+      (with-module-reading-parameterization
+        read))))
