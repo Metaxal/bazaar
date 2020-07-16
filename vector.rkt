@@ -47,3 +47,53 @@
 (define (vector-normalize! v)
   (define sum (for/sum ([x (in-vector v)]) x))
   (vector-map! (λ(x)(/ x sum)) v))
+
+;; Returns the best value (key x) of the elements x of the vector vec,
+;; along with its corresponding index in the vector.
+;; Values are compared with `better?`---if `(better? a b)` is not `#f` this
+;; means that `a` is better than `b`.
+;; The vector vec is assumed non-empty.
+;; vec : non-empty-vector?
+;; better? : T T -> boolean?
+;; key? : any/c -> T
+(define (vector-best+index vec better? #:key [key values])
+  (for/fold ([best-value (key (vector-ref vec 0))]
+             [best-index 0])
+            ([x (in-vector vec 1)]
+             [i (in-naturals 1)])
+    (define v (key x))
+    (if (better? v best-value)
+        (values v i)
+        (values best-value best-index))))
+
+(module+ test
+  (check-equal? (call-with-values (λ () (vector-best+index #(1 2 0 5 3 4) <))
+                                  list)
+                '(0 2))
+  (check-equal? (call-with-values (λ () (vector-best+index #(1 2 0 5 3 4) >))
+                                  list)
+                '(5 3))
+  (check-equal? (call-with-values (λ () (vector-best+index #(1 2 0 5 3 4) < #:key -))
+                                  list)
+                '(-5 3)))
+
+;; Like `vector-best+index` but returns only the best element (not its index)
+(define (vector-best vec better? #:key [key values])
+  (define-values (best index)
+    (vector-best+index vec better? #:key key))
+  best)
+
+;; Like `vector-best+index` but returns only the index (not the element)
+(define (vector-best-index vec better? #:key [key values])
+  (define-values (best index)
+    (vector-best+index vec better? #:key key))
+  index)
+
+(module+ test
+  (check-equal? (vector-best-index #(1 2 0 5 3 4) <)
+                2)
+  (check-equal? (vector-best-index #(1 2 0 5 3 4) < #:key -)
+                3))
+
+
+

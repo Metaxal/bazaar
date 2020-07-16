@@ -14,8 +14,8 @@
 (define (find-files-ex patterns [ignore-patterns '()]
                        [base-dir #f])
   (find-files 
-   (λ(f)(and (ormap (λ(pat)(regexp-match pat f)) patterns)
-             (not (ormap (λ(pat)(regexp-match pat f)) ignore-patterns))))
+   (λ (f) (and (ormap (λ (pat) (regexp-match pat f)) patterns)
+               (not (ormap (λ (pat) (regexp-match pat f)) ignore-patterns))))
    base-dir))
 
 #| Example:
@@ -62,9 +62,9 @@
 ;; Writes a path constructor from a path
 (define (write-path p)
   (cons 'build-path 
-        (map (λ(p-elt)(cond [(symbol? p-elt) (list 'quote p-elt)]
-                            [(absolute-path? p-elt) (path->string p-elt)]
-                            [else (path-element->string p-elt)]))
+        (map (λ (p-elt) (cond [(symbol? p-elt) (list 'quote p-elt)]
+                              [(absolute-path? p-elt) (path->string p-elt)]
+                              [else (path-element->string p-elt)]))
              (explode-path p))))
 
 #|
@@ -94,9 +94,9 @@
 ;; Retuns the first lines of the file f as a list of strings
 (define (file-head f [n-lines 10])
   (with-input-from-file f
-    (λ()(for/list ([line (in-lines)]
-                   [i (in-range n-lines)])
-          line))))
+    (λ () (for/list ([line (in-lines)]
+                     [i (in-range n-lines)])
+            line))))
 
 ;; read-data-thunk takes no argument and must return a single value that must be
 ;; writable to and readable from a file.
