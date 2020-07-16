@@ -304,3 +304,34 @@
   (time
    (length (combinations l 2))))
 
+;; Similar to zip-loop, but usable in for loops.
+;; This is as efficient as a named let.
+(define-sequence-syntax in-list+rest
+  (lambda () #'in-list+rest/proc)
+  (lambda (stx)
+    (syntax-case stx ()
+      [[(x r) (_ lst)]
+       #'[(x r)
+          (:do-in
+           ([(l) lst])
+           (unless (list? l)
+             (raise-argument-error 'in-list+rest "list?" l))
+           ([l l])
+           (not (null? l))
+           ([(x r) (values (car l) (cdr l))])
+           #true
+           #true
+           [r])]]
+      [_ #f])))
+
+(define (in-list+rest/proc l)
+  (for/list ([(x r) (in-list+rest l)]) (list x r)))
+
+(module+ test
+  (check-equal? (for/list ([(x r) (in-list+rest '(a b c))])
+                  (cons x r))
+                '((a b c) (b c) (c)))
+  (check-equal? (for*/list ([(x r) (in-list+rest '(a b c))]
+                            [y (in-list r)])
+                  (list x y))
+                '((a b) (a c) (b c))))
