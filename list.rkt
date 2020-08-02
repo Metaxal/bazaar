@@ -268,7 +268,10 @@
 (module+ test
   (let ([l (build-list 100 (λ(i)(random 100)))])
     (check-equal? (sort (remove-duplicates l) <)
-                (remove-duplicates-sorted (sort l <)))))
+                  (remove-duplicates-sorted (sort l <)))))
+
+;; Alias, just a better name
+(define remove-adjacent-duplicates remove-duplicates-sorted)
 
 (define (take-at-most l n)
   (for/list ([x (in-list l)]
