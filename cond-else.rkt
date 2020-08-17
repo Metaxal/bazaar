@@ -1,9 +1,9 @@
-#lang racket
-(require syntax/parse/define)
+#lang racket/base
+(require syntax/parse/define
+         (for-syntax racket/base))
 
-;;; TODO: Rename to cond-else.rkt 
-
-(provide cond/else)
+(provide begin/cond
+         cond/else)
 
 ;; Reduce rightward drift (and parentheses) when chaining conds
 ;; interleaved with defines and other 
