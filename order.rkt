@@ -11,7 +11,9 @@
 ;;; Also see data/order
 
 ;;; TODO: docs
-(module+ test (require rackunit))
+(module+ test
+  (require rackunit)
+  (provide check<=>))
 
 ;;; A comparator is a binary procedure that returns one of '(< > = #f).
 ;;; The value #f is for when the inputs cannot be compared.
@@ -116,3 +118,29 @@
                           (char<=>   (third l1)  (third l2)))))
    '(< > < =)))
 
+;; Going through l1 and l2 in parallel, return the first comparison
+;; that is not '=.
+;; If l1 is shorter (longer) than l2, then return '< ('>).
+;; The name is by similarity with `andmap` and `ormap`.
+(define (<=>map <=> l1 l2)
+  (let loop ([l1 l1] [l2 l2])
+    (define e1 (empty? l1))
+    (define e2 (empty? l2))
+    (cond [(and e1 e2) '=]
+          [e1 '<]
+          [e2 '>]
+          [else
+           (define c (<=> (car l1) (car l2)))
+           (if (order=? c)
+             (loop (cdr l1) (cdr l2))
+             c)])))
+
+(module+ test
+  (define (<=>mapper <=>)
+    (λ (l1 l2) (<=>map <=> l1 l2)))
+  (check<=> (<=>mapper number<=>) '(1 2 3 4 5) '(1 2 4) '<)
+  (check<=> (<=>mapper number<=>) '(1 2 3 4 5) '(1 2 3) '>)
+  (check<=> (<=>mapper number<=>) '(1 2 3 4 5) '(1 2 3 4 5) '=)
+  (check<=> (<=>mapper number<=>) '() '() '=))
+
+  
