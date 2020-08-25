@@ -13,7 +13,16 @@
 ;;; TODO: docs
 (module+ test
   (require rackunit)
-  (provide check<=>))
+  (provide check<=>)
+  
+  (define-check (check<=> <=> a b res)
+    (define got1 (<=> a b))
+    (unless (eq? got1 res)
+      (fail-check (format "<=> a b: expected ~a got ~a" res got1)))
+    (define res2 (<=>opposite res))
+    (define got2 (<=> b a))
+    (unless (eq? got2 res2)
+      (fail-check (format "<=> b a: expected ~a got ~a" res2 got2)))))
 
 ;;; A comparator is a binary procedure that returns one of '(< > = #f).
 ;;; The value #f is for when the inputs cannot be compared.
@@ -45,15 +54,32 @@
 (define symbol<=> (make<=> symbol<?))
 (define   char<=> (make<=> char<?))
 
+(define (boolean<=> a b)
+  #;'((#f #f =)
+      (#f #t <)
+      (#t #f >)
+      (#t #t =))
+  (if (eq? (and a #t) (and b #t))
+    '=
+    (if b '< '>)))
+
+(module+ test
+  (check<=> boolean<=> 4 #t '=)
+  (check<=> boolean<=> 4 #f '>)
+  (check<=> boolean<=> #f #t '<)
+  (check<=> boolean<=> #t #t '=)
+  (check<=> boolean<=> #f #f '=))
+
 (define (atom? a)
-  (or (number? a) (string? a) (symbol? a) (char? a) (null? a)))
+  (or (boolean? a) (number? a) (string? a) (symbol? a) (char? a) (null? a)))
 
 (define (atom<=> a b)
-  (cond [(and (number? a) (number? b)) (number<=> a b)]
-        [(and (string? a) (string? b)) (string<=> a b)]
-        [(and (symbol? a) (symbol? b)) (symbol<=> a b)]
-        [(and   (char? a)   (char? b))   (char<=> a b)]
-        [(and   (null? a)   (null? b)) '=]
+  (cond [(and (boolean? a) (boolean? b)) (boolean<=> a b)]
+        [(and  (number? a)  (number? b))  (number<=> a b)]
+        [(and    (char? a)    (char? b))    (char<=> a b)]
+        [(and  (symbol? a)  (symbol? b))  (symbol<=> a b)]
+        [(and  (string? a)  (string? b))  (string<=> a b)]
+        [(and    (null? a)    (null? b))               '=]
         [else #f]))
 
 ;; Takes time linear with the smallest list.
@@ -63,7 +89,8 @@
         [(not (pair? l2)) '>]
         [else (length<=> (cdr l1) (cdr l2))]))
 
-;; Returns the opposite of a comparison value.
+;; Returns the opposite of a comparison value, that is, for some comparator <=>,
+;; (<=>opposite (<=> a b)) == (<=> b a)
 (define (<=>opposite c)
   (case c
     [(<) '>]
@@ -77,10 +104,6 @@
   (check-true (order>? (number<=> 1 0)))
   (check-true (order≥? (number<=> 1 0)))
   (check-false (order≥? (number<=> 0 1)))
-
-  (define (check<=> <=> a b res)
-    (check-eq? (<=> a b) res)
-    (check-eq? (<=> b a) (<=>opposite res)))
   
   (check<=> string<=> "abc" "abd" '<)
   (check<=> length<=> 'a 'b '=)
