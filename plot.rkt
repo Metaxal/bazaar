@@ -10,6 +10,21 @@
 (module+ test
   (require rackunit))
 
+;; Returns a list of lines for plot of the powers of base.
+(define (powers base from to
+                #:line-type [line-type hrule] ; hrule or vrule
+                #:label [label #f]
+                #:color [color "gray"]
+                #:style [style 'long-dash])
+  (for/list ([i (in-range from (+ to 1))])
+    (hrule (expt base i) #:style style #:color color #:label (and (= i 0) label))))
+
+#; ; Example:
+(plot (powers 2 1 20 #:line-type lines) #:x-min -2 #:x-max 2 #:y-min 0 #:y-max 200)
+#;
+(plot (list (powers 2 1 20 #:line-type lines)
+              (function (λ (x) (expt 3 x)) 0 10)))
+
 ;; Warning: Can have weird effects on DrRacket's window!
 (define (string-ticks string-list)
   (let* ([N (length string-list)]
