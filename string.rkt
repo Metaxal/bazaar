@@ -2,7 +2,9 @@
 ;;; Copyright (C) Laurent Orseau, 2010-2013
 ;;; GNU Lesser General Public Licence (http://www.gnu.org/licenses/lgpl.html)
 
-(require racket/port)
+(require racket/port
+         racket/format
+         racket/list)
 
 (provide (all-defined-out))
 
@@ -41,3 +43,22 @@
   (check-false (string->data " # " #:on-error #f))
   (check-exn exn:fail:read? (λ () (string->data " # ")))
   (check-exn exn:fail:read? (λ () (string->data " . "))))
+
+;; Returns a list of strings that are the cartesian product of the arguments.
+(define (string*
+         #:->string [->string ~a]
+         . args)
+  (let loop ([args args])
+    (cond
+      [(empty? args) '("")]
+      [else
+       (define x (first args))
+       (for*/list ([y (in-list (if (list? x) x (list x)))]
+                   [str (in-list (loop (rest args)))])
+         (string-append (->string y) str))])))
+(module+ test
+  (check-equal? (string*) '(""))
+  (check-equal? (string* "_" '(a b c) ":" '(1 2 3))
+                '("_a:1" "_a:2" "_a:3" "_b:1" "_b:2" "_b:3" "_c:1" "_c:2" "_c:3")))
+
+
