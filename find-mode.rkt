@@ -3,6 +3,11 @@
 (require racket/list
          racket/dict
          racket/contract)
+
+;***************************************************************************************;
+;****                    Find Maximum / Minimum Of A 1D Function                    ****;
+;***************************************************************************************;
+
 (provide
  (contract-out
   ; Main function with all the features
