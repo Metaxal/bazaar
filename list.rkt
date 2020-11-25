@@ -15,6 +15,7 @@
            racket/set
            math/number-theory))
 
+;; OBSOLETE: Use random-ref and random-sample from racket/random instead
 (define (choose l)
   (if (empty? l)
       (error "List must not be empty")
