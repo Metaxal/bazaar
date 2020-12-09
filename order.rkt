@@ -42,22 +42,24 @@
 (define (order? c)
   (memq c '(< > = #f)))
 
-;; Returns a comparator based on <?.
-;; If fkey is a procedure of one argument, then the comparator returns #f
-;; whenever either input argument is not #f according to fkey.
-;; fkey: (or/c #f (procedure-arity-includes/c 1))
-(define (make<=> <? #:key-false [fkey #f])
+;; Returns a comparator based on <=?.
+;; Using <=? instead of <? enables returning #f when
+;; neither a <=? b or b <=? a.
+;; Particularly useful for numbers and +nan.0
+(define (make<=> <=?)
   (λ (a b)
-    (cond
-      [(and fkey (or (fkey a) (fkey b))) #f]
-      [(<? a b) '<]
-      [(<? b a) '>]
-      [else '=])))
+    (if (<=? a b)
+      (if (<=? b a)
+        '=
+        '<)
+      (if (<=? b a)
+        '>
+        #f))))
 
-(define number<=> (make<=> < #:key-false nan?))
-(define string<=> (make<=> string<?))
-(define symbol<=> (make<=> symbol<?))
-(define   char<=> (make<=> char<?))
+(define number<=> (make<=> <=))
+(define string<=> (make<=> string<=?))
+(define symbol<=> (make<=> (λ (a b) (or (eq? a b) (symbol<? a b)))))
+(define   char<=> (make<=> char<=?))
 
 (define (boolean<=> a b)
   #;'((#f #f =)
@@ -69,6 +71,14 @@
     (if b '< '>)))
 
 (module+ test
+  (check<=> number<=> 1 2 '<)
+  (check<=> number<=> 2 2 '=)
+  (check<=> number<=> 2 2.0 '=)
+  (check<=> number<=> +nan.0 +nan.0 #f)
+  (check<=> number<=> 2 +nan.0 #f)
+  (check<=> number<=> +inf.0 +inf.0 '=)
+  (check<=> number<=> -inf.0 +inf.0 '<)
+  
   (check<=> boolean<=> 4 #t '=)
   (check<=> boolean<=> 4 #f '>)
   (check<=> boolean<=> #f #t '<)
@@ -125,6 +135,10 @@
 ;;   cmp<=> : (-> T T order?)
 ;;   key : (-> any/c T)
 ;;   where T can be different from one cmp+key to the next.
+;; For example, make-chain can be used with sort:
+;; (sort l (make-chain<=> number<=> first
+;;                        symbol<=> second
+;;                        #:with-result order<?)
 (define (make-chain<=> #:with-result [with-result values]
                        . cmp+keys)
   (unless (procedure-arity-includes? with-result 1)
