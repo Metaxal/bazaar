@@ -112,6 +112,15 @@
     [(>) '<]
     [else c])) ; '= or #f
 
+;; Curries op to return the <=>opposite of what
+;; it would normally return.
+;; cmp<=> may take more or less than 2 arguments, but for a binary comparator,
+;; this amounts to swapping the order of the arguments, i.e.,
+;; ((<=>swap cmp<=>) a b) = (cmp<=> b a)
+;; Useful in particular with make-chain<=>
+(define ((<=>swap cmp<=>) . args)
+  (<=>opposite (apply cmp<=> args)))
+
 (module+ test
   (check-true (order<? (number<=> 0 1)))
   (check-true (order≤? (number<=> 0 1)))
