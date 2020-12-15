@@ -93,13 +93,13 @@
 ;; and n is the number of times it occurs in l.
 ;; The kind of dictionary can be controlled with the optional argument.
 ;; See also `samples->hash` and `count-samples` from math/statistics.
-(define (occurrences l [d (make-hash)])
+(define (occurrences l [d (make-hash)] #:key [key (λ (x) x)])
   (if (dict:dict-mutable? d)
-      (begin (for-each (λ(x)(dict:dict-update! d x add1 0)) l)
+      (begin (for-each (λ (x) (dict:dict-update! d (key x) add1 0)) l)
              d)
       (for/fold ([d d])
                 ([x (in-list l)])
-        (dict:dict-update d x add1 0))))
+        (dict:dict-update d (key x) add1 0))))
 
 (module+ test
   (let ([l '(a b a c c d a)]
