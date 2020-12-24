@@ -49,28 +49,28 @@
 
 (define op-dict
   (list
-   (list '$kind  'real   'fixnum     'flonum  'extflonum      'bigfloat       'unsafe-fixnum     'unsafe-flonum  'unsafe-extflonum  'lgnum) ; $kind holds the symbolic kind
-   (list '$?     real?   fixnum?     flonum?  extflonum?      bigfloat?       fixnum?            flonum?         extflonum?         lgnum?)
-   (list '$      values  fx          fl       real->extfl     bf              unsafe-fx          fl              real->extfl        log) ; real->$
-   (list '$->    values  fx->fl      values   extfl->inexact  bigfloat->real  unsafe-fx->fl      values          extfl->inexact     exp) ; $->real
-   (list '$+     +       fx+         fl+      extfl+          bf+             unsafe-fx+         unsafe-fl+      unsafe-extfl+      lg+)
-   (list '$-     -       fx-         fl-      extfl-          bf-             unsafe-fx-         unsafe-fl-      unsafe-extfl-      lg-)
-   (list '$*     *       fx*         fl*      extfl*          bf*             unsafe-fx*         unsafe-fl*      unsafe-extfl*      lg*)
-   (list '$/     /       fxquotient  fl/      extfl/          bf/             unsafe-fxquotient  unsafe-fl/      unsafe-extfl/      lg/)
-   (list '$=     =       fx=         fl=      extfl=          bf=             unsafe-fx=         unsafe-fl=      unsafe-extfl=      =)
-   (list '$>     >       fx>         fl>      extfl>          bf>             unsafe-fx>         unsafe-fl>      unsafe-extfl>      >)
-   (list '$<     <       fx<         fl<      extfl<          bf<             unsafe-fx<         unsafe-fl<      unsafe-extfl<      <)
-   (list '$>=    >=      fx>=        fl>=     extfl>=         bf>=            unsafe-fx>=        unsafe-fl>=     unsafe-extfl>=     >=)
-   (list '$<=    <=      fx<=        fl<=     extfl<=         bf<=            unsafe-fx<=        unsafe-fl<=     unsafe-extfl<=     >=)
-   (list '$abs   abs     fxabs       flabs    extflabs        bfabs           unsafe-fxabs       unsafe-flabs    unsafe-extflabs    values) ; no pos values in logspace
-   (list '$min   min     fxmin       flmin    extflmin        bfmin           unsafe-fxmin       unsafe-flmin    unsafe-extflmin    min)
-   (list '$max   max     fxmax       flmax    extflmax        bfmax           unsafe-fxmax       unsafe-flmax    unsafe-extflmax    max)
-   (list '$sum   NOOP    NOOP        flsum    NOOP            NOOP            NOOP               NOOP            NOOP               lgsum)
-   (list '$prod  NOOP    NOOP        flprod   NOOP            NOOP            NOOP               NOOP            NOOP               lgprod)
-   (list '$exp   exp     NOOP        flexp    extflexp        bfexp           NOOP               unsafe-flexp    unsafe-extflexp    NOOP)
-   (list '$exp2  NOOP    NOOP        flexp2   NOOP            bfexp2          NOOP               NOOP            NOOP               NOOP)
-   (list '$log   log     NOOP        fllog    extfllog        bflog           NOOP               unsafe-fllog    unsafe-extfllog    NOOP)
-   (list '$log2  NOOP    NOOP        fllog2   NOOP            bflog2          NOOP               NOOP            NOOP               NOOP)
+   (list '$kind  'real   'fixnum     'flonum  #;'extflonum      'bigfloat       'unsafe-fixnum     'unsafe-flonum  #;'unsafe-extflonum  'lgnum) ; $kind holds the symbolic kind
+   (list '$?     real?   fixnum?     flonum?  #;extflonum?      bigfloat?       fixnum?            flonum?         #;extflonum?         lgnum?)
+   (list '$      values  fx          fl       #;real->extfl     bf              unsafe-fx          fl              #;real->extfl        log) ; real->$
+   (list '$->    values  fx->fl      values   #;extfl->inexact  bigfloat->real  unsafe-fx->fl      values          #;extfl->inexact     exp) ; $->real
+   (list '$+     +       fx+         fl+      #;extfl+          bf+             unsafe-fx+         unsafe-fl+      #;unsafe-extfl+      lg+)
+   (list '$-     -       fx-         fl-      #;extfl-          bf-             unsafe-fx-         unsafe-fl-      #;unsafe-extfl-      lg-)
+   (list '$*     *       fx*         fl*      #;extfl*          bf*             unsafe-fx*         unsafe-fl*      #;unsafe-extfl*      lg*)
+   (list '$/     /       fxquotient  fl/      #;extfl/          bf/             unsafe-fxquotient  unsafe-fl/      #;unsafe-extfl/      lg/)
+   (list '$=     =       fx=         fl=      #;extfl=          bf=             unsafe-fx=         unsafe-fl=      #;unsafe-extfl=      =)
+   (list '$>     >       fx>         fl>      #;extfl>          bf>             unsafe-fx>         unsafe-fl>      #;unsafe-extfl>      >)
+   (list '$<     <       fx<         fl<      #;extfl<          bf<             unsafe-fx<         unsafe-fl<      #;unsafe-extfl<      <)
+   (list '$>=    >=      fx>=        fl>=     #;extfl>=         bf>=            unsafe-fx>=        unsafe-fl>=     #;unsafe-extfl>=     >=)
+   (list '$<=    <=      fx<=        fl<=     #;extfl<=         bf<=            unsafe-fx<=        unsafe-fl<=     #;unsafe-extfl<=     >=)
+   (list '$abs   abs     fxabs       flabs    #;extflabs        bfabs           unsafe-fxabs       unsafe-flabs    #;unsafe-extflabs    values) ; no pos values in logspace
+   (list '$min   min     fxmin       flmin    #;extflmin        bfmin           unsafe-fxmin       unsafe-flmin    #;unsafe-extflmin    min)
+   (list '$max   max     fxmax       flmax    #;extflmax        bfmax           unsafe-fxmax       unsafe-flmax    #;unsafe-extflmax    max)
+   (list '$sum   NOOP    NOOP        flsum    #;NOOP            NOOP            NOOP               NOOP            #;NOOP               lgsum)
+   (list '$prod  NOOP    NOOP        flprod   #;NOOP            NOOP            NOOP               NOOP            #;NOOP               lgprod)
+   (list '$exp   exp     NOOP        flexp    #;extflexp        bfexp           NOOP               unsafe-flexp    #;unsafe-extflexp    NOOP)
+   (list '$exp2  NOOP    NOOP        flexp2   #;NOOP            bfexp2          NOOP               NOOP            #;NOOP               NOOP)
+   (list '$log   log     NOOP        fllog    #;extfllog        bflog           NOOP               unsafe-fllog    #;unsafe-extfllog    NOOP)
+   (list '$log2  NOOP    NOOP        fllog2   #;NOOP            bflog2          NOOP               NOOP            #;NOOP               NOOP)
    ; to complete...
    ))
 
@@ -84,11 +84,11 @@
   '((default generic real #f)
     (fixnum fx)
     (flonum fl)
-    (extflonum extfl)
+    #;(extflonum extfl)
     (bigfloat bf)
     (unsafe-fixnum unsafe-fx)
     (unsafe-flonum unsafe-fl)
-    (unsafe-extflonum unsafe-extfl)
+    #;(unsafe-extflonum unsafe-extfl)
     (lgnum lognum log-flonum lg)
     ))
 
