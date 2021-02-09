@@ -9,7 +9,43 @@
 ;***************************************************************************************;
 ;****                        Order Relations And Comparators                        ****;
 ;***************************************************************************************;
-;;; Also see data/order
+;;; See also https://srfi.schemers.org/srfi-67/srfi-67.html#node_idx_90
+;;; but only meant for total orders (values are {-1, 0, 1} instead of {'<, '=, '>, #f}).
+;;; and data/order (also total order).
+;;;
+;;; A comparator <=> must ensure that
+;;; if (<=> a b) = '< then (<=> b a) = '>
+;;; if (<=> a b) = '= then (<=> b a) = '=
+;;; if (<=> a b) = #f then (<=> b a) = #f
+;;; if (<=> a b) = '< and (<=> b c) = '< then (<=> a c) = '<
+;;;
+;;; Easily sort multi-valued elements by 1 entry, and if = then by a second entry,
+;;; and if = then by a third entry and so on.
+;;; Example use case with sorting:
+#;
+(begin
+  (struct data (name quality quantity) #:prefab)
+  (define data '(#s(data banana "sweet" 2)
+                 #s(data apple "red" 4)
+                 #s(data apple "red" 2)
+                 #s(data kiwi "green" 2)
+                 #s(data apple "green" 4)))
+  
+  (sort data (make-chain<=> symbol<=> data-name
+                            string<=> data-quality
+                            number<=> data-quantity
+                            #:with-result order<?))
+  ; -->
+  #;
+  (#s(data apple "green" 4)
+   #s(data apple "red" 2)
+   #s(data apple "red" 4)
+   #s(data banana "sweet" 2)
+   #s(data kiwi "green" 2)))
+;;;
+;;; Comparators can also be used to maintain a set of canonical elements (that is,
+;;; when adding an element B in the set, if there is already an element A
+;;; such that (<=> B A) is '<, then A should be removed).
 
 ;;; TODO: docs
 (module+ test
