@@ -12,7 +12,7 @@
 ;; headers. To prevent this, we simply add some noise in the url.
 (define (url-bust-cache aurl)
   (struct-copy url aurl
-               [query (cons (cons 'cachebust (number->string (random 4294967087)))
+               [query (cons (cons 'cachebust (number->string (current-milliseconds)))
                             (url-query aurl))]))
 
 ;; Accepts a string representing a URL and returns the corresponding raw webpage.
