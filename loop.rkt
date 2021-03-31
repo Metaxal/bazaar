@@ -123,6 +123,7 @@
   )
 
 
+;; SUPERSEDED by `in-zip`.
 ;; Zips the list l from left to right. At each step of the loop, the bindings
 ;; rev-left, x and next-right.
 ;; Accepts any number of fold (for/fold-like) variables. The number of values returned
@@ -333,3 +334,47 @@
                             [y (in-list r)])
                   (list x y))
                 '((a b) (a c) (b c))))
+
+;; Similar to zip-loop, but usable in for loops.
+;; This is as efficient as a named let.
+(define-sequence-syntax in-zip
+  (lambda () #'in-zip/proc)
+  (lambda (stx)
+    (syntax-case stx ()
+      [[(rev-l x r) (_ lst)]
+       #'[(rev-l x r)
+          (:do-in
+           ; ([(outer-id ...) outer-expr] ...)
+           ([(l) lst])
+           ; outer-check
+           (unless (list? l)
+             (raise-argument-error 'in-list+rest "list?" l))
+           ; ([loop-id loop-expr] ...)
+           ([rev-l '()] [r l])
+           ; pos-guard
+           (not (null? r))
+           ;([(inner-id ...) inner-expr] ...)
+           ([(rev-l x r) (values rev-l (car r) (cdr r))])
+           ; pre-guard
+           #true
+           ; post-guard
+           (not (null? r))
+           ; (loop-arg ...)
+           [(cons x rev-l) r])]]
+      [_ #f])))
+
+(define (in-zip/proc l)
+  (for/list ([(rev-l x r) (in-zip l)]) (list rev-l x r)))
+
+(module+ test
+  (require rackunit)
+  (check-equal?
+   (for/list ([(rev-l x r) (in-zip '(a b c))])
+     (list rev-l x r))
+   '((() a (b c))
+     ((a) b (c))
+     ((b a) c ())))
+  (check-equal?
+   (for/list ([(rev-l x r) (in-zip '())])
+     (list rev-l x r))
+   '()))
