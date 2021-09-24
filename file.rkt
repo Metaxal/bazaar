@@ -100,6 +100,31 @@
 
 ;; read-data-thunk takes no argument and must return a single value that must be
 ;; writable to and readable from a file.
+;; This value is stored in cache-file for faster loading next time, avoiding calling
+;; read-data-thunk, unless force? is not #false.
+(define (with-cache cache-file read-data-thunk
+          #:force? [force? #false]
+          #:verbose? [verbose? #false])
+  (assert (procedure-arity-includes? read-data-thunk 0))
+  (cond [(or force? (not (file-exists? cache-file)))
+         (when verbose?
+           (printf "Generating cache file: ~a\n" (path->string cache-file)))
+         (define D (read-data-thunk))
+         (write-to-file D cache-file #:exists 'replace)
+         D]
+        [else (file->value cache-file)]))
+
+#; ; Example
+(module+ drracket
+  (require math/number-theory)
+  (time
+   (with-cache "/tmp/primes.cache" ; #:force? #true
+     (λ ()
+       (displayln "Factorizing for the first time... ")
+       (factorize (* (nth-prime 101345) (nth-prime 145344)))))))
+
+;; read-data-thunk takes no argument and must return a single value that must be
+;; writable to and readable from a file.
 ;; This value is stored in cache-file for faster loading next time.
 ;; If cache-file is younger that data-file or force? is not #f,
 ;; it loads the data from cache-file directly and read-data-thunk is not called.
