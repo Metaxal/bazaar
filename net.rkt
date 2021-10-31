@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require net/url
+(require define2
+         net/url
          racket/contract
          racket/string
          racket/port)

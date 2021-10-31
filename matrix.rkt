@@ -2,7 +2,8 @@
 
 ;;; 2d matrices
 
-(require racket/performance-hint
+(require define2
+         racket/performance-hint
          racket/list
          racket/vector
          )

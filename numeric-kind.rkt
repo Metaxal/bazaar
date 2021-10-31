@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require racket/dict
+(require define2
+         racket/dict
          math/flonum
          racket/fixnum
          racket/extflonum

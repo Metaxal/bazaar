@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require syntax/parse/define
+(require define2
+         syntax/parse/define
          racket/list)
 
 (provide (all-defined-out))

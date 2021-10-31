@@ -1,5 +1,6 @@
 #lang racket
-(require bazaar/debug)
+(require define2
+         bazaar/debug)
 
 (provide make-heap heap-empty? heap-insert! heap-remove-min! heap-min)
 

@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require plot
+(require define2
+         plot
          racket/list
          racket/dict)
 

@@ -1,5 +1,6 @@
 #lang racket/base
-(require racket/file
+(require define2
+         racket/file
          racket/list
          racket/string
          racket/path

@@ -1,9 +1,10 @@
 #lang racket/base
 
-(require "list.rkt"
-         "mutation.rkt"
+(require define2
          racket/list
-         racket/function)
+         racket/function
+         "list.rkt"
+         "mutation.rkt")
 
 (provide (all-defined-out))
 

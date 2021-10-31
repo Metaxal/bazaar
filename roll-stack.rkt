@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require bazaar/struct)
+(require define2
+         bazaar/struct)
 
 (provide (all-defined-out))
 

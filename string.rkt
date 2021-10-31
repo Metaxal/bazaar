@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require racket/port
+(require define2
+         racket/port
          racket/format
          racket/list)
 

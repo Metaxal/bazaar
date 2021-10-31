@@ -1,7 +1,9 @@
-#lang racket
+#lang racket/base
 
-(require (for-syntax racket/syntax
-                     syntax/parse))
+(require define2
+         (for-syntax racket/syntax
+                     syntax/parse
+                     racket/base))
 
 (provide struct+
          with-struct

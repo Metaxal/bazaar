@@ -1,11 +1,11 @@
 #lang racket/base
 
-(require (for-syntax syntax/parse
+(require define2
+         (for-syntax syntax/parse
                      racket/base)
          racket/stxparam
          rackunit
-         "base.rkt"
-         )
+         "base.rkt")
 
 (provide debug-line
          debug-var

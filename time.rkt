@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require racket/match)
+(require define2
+         racket/match)
 
 (provide (all-defined-out))
 

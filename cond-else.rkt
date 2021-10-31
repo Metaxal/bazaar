@@ -1,5 +1,6 @@
 #lang racket/base
-(require syntax/parse/define
+(require define2
+         syntax/parse/define
          (for-syntax racket/base))
 
 (provide begin/cond

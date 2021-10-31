@@ -1,5 +1,6 @@
 #lang racket/base
-(require racket/string
+(require define2
+         racket/string
          racket/list)
 
 (provide (all-defined-out))

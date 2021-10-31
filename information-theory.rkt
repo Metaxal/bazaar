@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require (rename-in racket/base [log ln])
+(require define2
+         (rename-in (only-in racket/base log) [log ln])
          math/flonum
          racket/contract
          racket/function

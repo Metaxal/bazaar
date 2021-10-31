@@ -1,5 +1,6 @@
 #lang racket/base
-(require racket/vector)
+(require define2
+         racket/vector)
 
 (provide #;(struct-out rvector)
          (rename-out [construct-rvector rvector])

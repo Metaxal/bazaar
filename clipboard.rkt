@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require racket/gui/base
+(require define2
+         racket/gui/base
          racket/format
          racket/class)
 

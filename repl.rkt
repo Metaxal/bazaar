@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require racket/contract/base
+(require define2
+         racket/contract/base
          racket/port)
 
 (provide/contract

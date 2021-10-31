@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require racket/format
+(require define2
+         racket/format
          racket/date)
 
 (provide (all-defined-out)

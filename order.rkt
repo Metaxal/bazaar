@@ -1,5 +1,7 @@
 #lang racket/base
-(require (for-syntax racket/base)
+
+(require define2
+         (for-syntax racket/base)
          racket/math
          racket/list
          (submod racket/performance-hint begin-encourage-inline))

@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require racket/file)
+(require define2
+         racket/file)
 
 (provide (all-defined-out))
 

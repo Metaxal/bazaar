@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require (prefix-in dict: racket/dict)
+(require define2
+         (prefix-in dict: racket/dict)
          racket/format
          racket/string)
 

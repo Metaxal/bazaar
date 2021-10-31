@@ -2,9 +2,10 @@
 
 (provide (all-defined-out))
 
+(require define2)
+
 (module+ test
   (require rackunit))
-
 
 (define (round-decimal x n)
   (define r (expt 10 n))

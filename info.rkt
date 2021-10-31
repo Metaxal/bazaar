@@ -3,6 +3,7 @@
 (define deps
  '("base"
    "data-lib"
+   "define2"
    "draw-lib"
    "gui-lib"
    "images"

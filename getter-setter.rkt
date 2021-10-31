@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require (for-syntax racket/syntax 
+(require define2
+         (for-syntax racket/syntax 
                      racket/base)
          "define.rkt"
          racket/class ; because of define/public

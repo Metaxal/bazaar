@@ -1,5 +1,6 @@
 #lang racket
-(require racket/gui
+(require racket/gui/base
+         define2
          plot)
 
 (provide (all-from-out plot)

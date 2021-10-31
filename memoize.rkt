@@ -5,6 +5,8 @@
          define/memoize/values
          memoize/values)
 
+(require define2)
+
 (define (memoize f)
   (define h (make-hash))
   (λ args
