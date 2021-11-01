@@ -1,4 +1,4 @@
-#lang setup/infotab
+#lang info
 
 (define deps
  '("base"
@@ -20,4 +20,5 @@
 
 (define test-omit-paths
   '("slideshow/examples"
-    "gui/examples"))
+    "gui/examples"
+    "text-table.rkt"))
