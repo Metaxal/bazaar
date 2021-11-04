@@ -3,7 +3,7 @@
 (require syntax/parse/define
          (for-syntax racket/base
                      syntax/parse
-                     syntax/srcloc))
+                     racket/syntax-srcloc))
 
 (provide convert let/convert)
 
@@ -26,11 +26,7 @@
                             '(predicate ...)
                             y)
                     (current-continuation-marks)
-                    (srcloc '#,(syntax-source #'x)
-                            '#,(syntax-line #'x)
-                            '#,(syntax-column #'x)
-                            '#,(syntax-position #'x)
-                            '#,(syntax-span #'x))))]))]))
+                    #,(syntax-srcloc #'x)))]))]))
 
 ;; Converts the x using the converter of the first matching predicate.
 ;; The results shadow the original x.
