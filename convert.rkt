@@ -1,20 +1,40 @@
 #lang racket/base
 
-(require syntax/parse/define)
+(require syntax/parse/define
+         (for-syntax racket/base
+                     syntax/parse
+                     syntax/srcloc))
 
 (provide convert let/convert)
 
-(define-syntax-parse-rule (convert x [predicate converter] ...)
-  (cond
-    [(predicate x) (converter x)] ...
-    [else (error (format "Cannot convert ~a. Supported predicates: ~a"
-                         'x
-                         '(predicate ...)))]))
+(struct exn:fail:convert exn:fail (a-srcloc)
+  #:property prop:exn:srclocs
+  (λ (a-struct)
+    (list (exn:fail:convert-a-srcloc a-struct))))
 
-;; TODO: Export to bazaar?
+;; todo: syntax-loc #'x
+(define-syntax (convert stx)
+  (syntax-parse stx
+    [(convert x:expr [predicate converter] ...)
+     #`(let ([y x]) ; in case x is an expression
+         (cond
+           [(predicate y) (converter y)] ...
+           [else
+            (raise (exn:fail:convert
+                    (format "Cannot convert `~a`\n Supported predicates: ~v\n Given: ~v"
+                            'x
+                            '(predicate ...)
+                            y)
+                    (current-continuation-marks)
+                    (srcloc '#,(syntax-source #'x)
+                            '#,(syntax-line #'x)
+                            '#,(syntax-column #'x)
+                            '#,(syntax-position #'x)
+                            '#,(syntax-span #'x))))]))]))
+
 ;; Converts the x using the converter of the first matching predicate.
 ;; The results shadow the original x.
-(define-syntax-parse-rule (let/convert ([x [predicate converter] ...]
+(define-syntax-parse-rule (let/convert ([x:id [predicate converter] ...]
                                         ...)
                             body ...)
   (let ([x (convert x [predicate converter] ...)]
@@ -23,7 +43,21 @@
 
 (module+ drracket
   ; Example
-  (define lst 3 #;#(a b c))
+  ; We could use just `define` instead of `define-syntax-rule`,
+  ; but the latter is able to propagate the source-location information to
+  ; convert, so that the error is displayed at the call site of convexrt-x,
+  ; rather than at the call site of convert inside the function.
+  (define-syntax-rule (convert-x lst)
+    (convert lst
+             [list? values]
+             [vector? vector->list]
+             [string? string->list]))
+  (convert-x '(a b c))
+  (convert-x #(a b c))
+  (convert-x "abc")
+  (convert-x 'abc) ; DrRacket will display the error here
+  
+  (define lst #(a b c))
   (let/convert ([lst [list? values]
                      [vector? vector->list]])
     (displayln lst)))
