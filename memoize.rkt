@@ -61,8 +61,7 @@
     [(_ (fun args ...))
      #:with cache-val (syntax-local-lift-expression #'#f)
      #:with cache-args (syntax-local-lift-expression #''())
-     #'(begin
-         (define largs (list args ...))
+     #'(let ([largs (list args ...)])
          (cond [(and (= (length cache-args) (length largs))
                      (for/and ([c (in-list cache-args)] [a (in-list largs)])
                        (eq? c a)))
