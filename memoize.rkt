@@ -1,11 +1,16 @@
 #lang racket/base
 
+(require (for-syntax racket/base syntax/parse))
+
 (provide define/memoize
          memoize
          define/memoize/values
-         memoize/values)
+         memoize/values
+         cache-last)
 
 (require define2)
+
+;;; TODO: Should we use weak hashes?
 
 (define (memoize f)
   (define h (make-hash))
@@ -47,3 +52,42 @@
       (apply values (hash-ref! h (list args ...) (λ()(call-with-values (λ()body ...) list)))))))
 
 ;; Todo: Throw an exception when a cycle is detected?
+
+;; A simple form a memoization where if the syntax element is called with the same (eq?)
+;; arguments, then the result is returned immediately without calculating it.
+;; Note that the same computation at two different syntax location make two separate computations.
+(define-syntax (cache-last stx)
+  (syntax-parse stx
+    [(_ (fun args ...))
+     #:with cache-val (syntax-local-lift-expression #'#f)
+     #:with cache-args (syntax-local-lift-expression #''())
+     #'(begin
+         (define largs (list args ...))
+         (cond [(and (= (length cache-args) (length largs))
+                     (for/and ([c (in-list cache-args)] [a (in-list largs)])
+                       (eq? c a)))
+                cache-val]
+               [else
+                (define v (apply fun largs))
+                (set! cache-val v)
+                (set! cache-args largs)
+                v]))]))
+
+
+(module+ stress-test
+  (define l (build-list 100000 (λ (i) (random))))
+  ;; Extremely fast
+  (time
+   (for/sum ([i 100000])
+     (cache-last (length l))))
+
+  ;; Slow because no caching
+  (time
+   (for/sum ([i 100000])
+     (length l)))
+
+  ;; Slow because can't reuse the previous cache
+  (time
+   (for/sum ([i 100000])
+     (define l (build-list 100000 (λ (i) (random))))
+     (cache-last (length l)))))
