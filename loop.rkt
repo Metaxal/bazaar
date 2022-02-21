@@ -22,6 +22,7 @@
       (loop))))
 
 (define no-elt (gensym 'no-elt))
+(define (no-elt? x) (eq? x no-elt))
 
 
 ;; for/fold is very often used with define-values
