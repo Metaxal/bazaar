@@ -10,12 +10,15 @@
 
 (require define2)
 
-;;; TODO: Should we use weak hashes?
+;;; If using eq? we could use a weak-hasheq, but that means
+;;; all arguments must be checked with eq? AND they must
+;;; be held in a list of arguments that is itself eq?, which
+;;; is unlikely :(
 
 (define (memoize f)
   (define h (make-hash))
   (λ args
-    (hash-ref! h args (λ()(apply f args)))))
+    (hash-ref! h args (λ () (apply f args)))))
 
 ;; Simple memoization
 (define-syntax-rule (define/memoize (f args ...) body ...)
@@ -41,7 +44,7 @@
 (define (memoize/values f)
   (define h (make-hash))
   (λ args
-    (apply values (hash-ref! h args (λ()(call-with-values (λ()(apply f args)) list))))))
+    (apply values (hash-ref! h args (λ () (call-with-values (λ () (apply f args)) list))))))
 
 ;; Simple memoization
 (define-syntax-rule (define/memoize/values (f args ...) body ...)
@@ -49,7 +52,7 @@
     ; One hash per function
     (define h (make-hash))
     (define (f args ...)
-      (apply values (hash-ref! h (list args ...) (λ()(call-with-values (λ()body ...) list)))))))
+      (apply values (hash-ref! h (list args ...) (λ () (call-with-values (λ () body ...) list)))))))
 
 ;; Todo: Throw an exception when a cycle is detected?
 
