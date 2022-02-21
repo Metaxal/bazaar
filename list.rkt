@@ -14,6 +14,20 @@
            racket/set
            math/number-theory))
 
+;; Take Θ(min(length(l1), length(l2)) instead of Θ(length(l1) + length(l2))
+(define (length<? l1 l2)
+  (cond [(null? l2) #false]
+        [(null? l1) #true]
+        [else (length<? (cdr l1) (cdr l2))]))
+
+(module+ test
+  (check-true (length<? '() '(a)))
+  (check-true (length<? '(a) '(a b)))
+  (check-false (length<? '() '()))
+  (check-false (length<? '(a) '(a)))
+  (check-false (length<? '(a b) '(a))))
+
+
 ;; OBSOLETE: Use random-ref and random-sample from racket/random instead
 (define (choose l)
   (if (empty? l)
