@@ -12,7 +12,6 @@
   (λ (a-struct)
     (list (exn:fail:convert-a-srcloc a-struct))))
 
-;; todo: syntax-loc #'x
 (define-syntax (convert stx)
   (syntax-parse stx
     [(convert x:expr [predicate converter] ...)

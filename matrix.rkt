@@ -1,6 +1,7 @@
 #lang racket/base
 
 ;;; 2d matrices
+;;; I wish I'd call this `board` instead...
 
 (require define2
          racket/performance-hint
