@@ -2,7 +2,8 @@
 
 (require define2
          racket/list
-         racket/math)
+         racket/math
+         math/base)
 
 (provide (all-defined-out))
 
@@ -14,6 +15,12 @@
   (cond [(< x 0) -1]
         [(> x 0) 1]
         [else 0]))
+
+;; A more numerically stable normalization
+;; xs: (listof real?)
+(define (flnormalize xs)
+  (define s (sum xs))
+  (map (λ (x) (/ x s)) xs))
 
 ;; points : (listof (list/c real real)) ; list of (x y) coordinates
 ;; Returns a, b and f(x)=ax+b.
