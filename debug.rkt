@@ -5,6 +5,7 @@
                      racket/base)
          racket/stxparam
          rackunit
+         math/base
          "base.rkt")
 
 (provide debug-line
@@ -110,7 +111,7 @@
 (define check-sum=1
   (case-lambda
     [(l) (check-sum=1 l (current-check-precision))]
-    [(l ε) (check-≃ (for/sum ([x l]) x) 1. ε)]))
+    [(l ε) (check-≃ (sum (for/list ([x l]) x)) 1. ε)]))
 
 (module+ test
   (check-sum=1 '(0.2 0.3 .5))
@@ -136,7 +137,7 @@
   expr)
 
 (define (info-str fmt . args)
-  (display (string-append (apply format fmt args) "... ")))
+  (display (string-append (apply format fmt args) "… ")))
 
 (define (ok)
   (displayln "Ok."))

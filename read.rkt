@@ -44,6 +44,7 @@
 ;;
 ;; `restruct` can also be used to rebind procedures when used in combination with
 ;; `readtable-#<procedure:> above. See example in the tests below.
+;; We could even write function applications.
 ;;
 ;; s: A result of `read`.
 ;; struct-dict: (dict-of symbol? procedure?)

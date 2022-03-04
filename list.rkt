@@ -110,9 +110,10 @@
 ;; l: (listof real?)
 ;; -> (listof real?)
 ;; Assumes the sum is non-zero
+;; see also bazar/math:flnormalize
 (define (normalize l)
   (define s (apply + l))
-  (map (λ(x)(/ x s)) l))
+  (map (λ (x) (/ x s)) l))
 
 ;; Maps a list of lists of elements (keeps the list of list structure).
 ;; See also tree-map in tree.rkt
@@ -131,7 +132,7 @@
 ;; Return the multiple values of proc-call as a list
 ;; See also values->list in "values.rkt"
 (define-syntax-rule (call/values->list expr)
-  (call-with-values (λ()expr) (λ l l)))
+  (call-with-values (λ () expr) (λ l l)))
 ; Example:
 ; (call/values->list (values 1 2 3))
 ; -> '(1 2 3)
