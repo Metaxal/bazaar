@@ -3,7 +3,8 @@
 (require define2
          racket/list
          racket/math
-         math/base)
+         math/base
+         math/flonum)
 
 (provide (all-defined-out))
 
@@ -25,7 +26,7 @@
 ;; Non-float values are turned to floats.
 (define (flnormalize xs)
   (let ([xs (map (λ (x) (max 0. x)) xs)])
-    (define s (sum xs))
+    (define s (flsum xs))
     (map (λ (x) (/ x s)) xs)))
 
 ;; points : (listof (list/c real real)) ; list of (x y) coordinates
