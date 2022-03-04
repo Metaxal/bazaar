@@ -4,7 +4,6 @@
          (for-syntax syntax/parse
                      racket/base)
          racket/stxparam
-         rackunit
          math/base
          "base.rkt")
 
@@ -95,36 +94,26 @@
 
 ;; Todo: rename to assert?
 ;; Checks that x is with ε of y, produces an error otherwise
-(define check-≃
-  (case-lambda
-    [(x y)(check-≃ x y (current-check-precision))]
-    [(x y ε)
-     (let ([xx x]
-           [yy y]
-           [εε ε])
-       (check-= xx yy εε))]))
+(define (check-≃ x y [ε (current-check-precision)])
+  (unless (<= (abs (- x y)) ε)
+    (error (format "(check-≃ ~a ~a ~a) failed." x y ε))))
 
 (module+ test
   (check-≃ 0.99 1.009 0.02))
 
 ;; Checks that the elements of the list l sums to 1 within ε (1e-7 by default)
-(define check-sum=1
-  (case-lambda
-    [(l) (check-sum=1 l (current-check-precision))]
-    [(l ε) (check-≃ (sum (for/list ([x l]) x)) 1. ε)]))
+(define (check-sum=1 l [ε (current-check-precision)])
+  (check-≃ (sum (for/list ([x l]) x)) 1. ε))
 
 (module+ test
   (check-sum=1 '(0.2 0.3 .5))
   (check-sum=1 #(0.2 0.3 .5)))
 
-(define check-proba-list
-  (case-lambda
-    [(l) (check-proba-list l (current-check-precision))]
-    [(l ε)
-     (check-sum=1 l ε)
-     (for ([x (in-list l)])
-       (check >= x 0.)
-       (check <= x (+ 1. ε)))])) ; can be slightly larger than 1.??
+(define (check-proba-list l [ε (current-check-precision)])
+  (check-sum=1 l ε)
+  (for ([x (in-list l)])
+    (unless (<= 0. x (+ 1. ε))  ; can be slightly larger than 1.??
+      (error "Not a proba list. Offending: " x l))))
 
 (module+ test
   (check-proba-list '(0.2 0.3 .5)))
