@@ -108,12 +108,23 @@
    '(2 10 13 18 23 23 22 24)))
 
 ;; l: (listof real?)
-;; -> (listof real?)
-;; Assumes the sum is non-zero
-;; see also bazar/math:flnormalize
+;; -> (listof (between/c 0. 1.))
+;; If some numbers are negative, they are rounded up to 0.
+;; This can be useful if very small negative values creep in due to
+;; numerical error from a subtraction.
+;; see also bazaar/math:flnormalize
 (define (normalize l)
-  (define s (apply + l))
-  (map (λ (x) (/ x s)) l))
+  (let ([l (map (λ (x) (max 0 x)) l)])
+    (define s (apply + l))
+    (map (λ (x) (/ x s)) l)))
+
+(module+ test
+  (check-equal? (normalize '(1 2 3))
+                '(1/6 1/3 1/2))
+  (check-equal? (normalize '(-1 2 3))
+                '(0 2/5 3/5))
+  (check-equal? (normalize '(-1e-5 2. 3))
+                '(0. 0.4 0.6)))
 
 ;; Maps a list of lists of elements (keeps the list of list structure).
 ;; See also tree-map in tree.rkt

@@ -18,9 +18,15 @@
 
 ;; A more numerically stable normalization
 ;; xs: (listof real?)
+;; -> (listof (between/c 0. 1.))
+;; If any x is negative, it is rounded up to 0.
+;; This can be useful if very small negative values creep in due to
+;; numerical error from a subtraction.
+;; Non-float values are turned to floats.
 (define (flnormalize xs)
-  (define s (sum xs))
-  (map (λ (x) (/ x s)) xs))
+  (let ([xs (map (λ (x) (max 0. x)) xs)])
+    (define s (sum xs))
+    (map (λ (x) (/ x s)) xs)))
 
 ;; points : (listof (list/c real real)) ; list of (x y) coordinates
 ;; Returns a, b and f(x)=ax+b.
