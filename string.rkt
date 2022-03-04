@@ -24,6 +24,7 @@
 (define (string-or-false->string s [false-string ""])
   (or s false-string))
 
+;; Somewhat equivalent to string->list below.
 ;; Returns the lisp-like data contained in a string.
 ;; When a read exception is caught, if on-error is a procedure of arity 1,
 ;; it is called with the exception as argument, o.w. it is returned as a value.
@@ -42,6 +43,15 @@
   (check-false (string->data " # " #:on-error #f))
   (check-exn exn:fail:read? (λ () (string->data " # ")))
   (check-exn exn:fail:read? (λ () (string->data " . "))))
+
+;; copied/adapted from racket/file
+(define (string->value f #:mode [file-mode 'binary])
+  (call-with-input-string f #:mode file-mode read))
+
+(define (string->list f [r read] #:mode [file-mode 'binary])
+  (unless (and (procedure? r) (procedure-arity-includes? r 1))
+    (raise-argument-error 'file->list "(procedure-arity-includes/c 1)" r))
+  (call-with-input-string f (lambda (p) (for/list ([v (in-port r p)]) v))))
 
 ;; Returns a list of strings that are the cartesian product of the arguments.
 (define (string*
