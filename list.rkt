@@ -126,7 +126,9 @@
   (check-equal? (normalize '(-1 2 3))
                 '(0 2/5 3/5))
   (check-equal? (normalize '(-1e-5 2. 3))
-                '(0. 0.4 0.6)))
+                '(0. 0.4 0.6))
+  (check-equal? (normalize '(-0.0 1.))
+                '(0. 1.)))
 
 ;; Maps a list of lists of elements (keeps the list of list structure).
 ;; See also tree-map in tree.rkt
