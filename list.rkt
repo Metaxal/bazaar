@@ -112,9 +112,11 @@
 ;; If some numbers are negative, they are rounded up to 0.
 ;; This can be useful if very small negative values creep in due to
 ;; numerical error from a subtraction.
+;; Notice: Strangely, it is important that we write (max x 0) because
+;;   (max 0 -0.) = -0.0  and (max -0. 0) = 0.0.
 ;; see also bazaar/math:flnormalize
 (define (normalize l)
-  (let ([l (map (λ (x) (max 0 x)) l)])
+  (let ([l (map (λ (x) (max x 0)) l)])
     (define s (apply + l))
     (map (λ (x) (/ x s)) l)))
 
