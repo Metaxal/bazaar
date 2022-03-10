@@ -132,6 +132,7 @@
 
 ;; Maps a list of lists of elements (keeps the list of list structure).
 ;; See also tree-map in tree.rkt
+;; TODO: More efficient version using rev-append
 (define (map-map proc ll)
   (for/list ([l (in-list ll)])
     (for/list ([x (in-list l)])
@@ -345,3 +346,43 @@
       {'(a)}
       {(cons (- x) (loop (rest l)))}))
    '(-3 -4 -5 a)))
+
+;; Like `argmax` but allows for a `key` argument like `sort`.
+;; The key is used at most once per element (thus there is no
+;; need for a #:cache-key? argument like for `sort`).
+;; If `return-value` is not #f, both the best element and its value are returned,
+;; otherwise only the best element is returned.
+;; If `better?` is strict (like `<`), then the first best element is returned.
+;; If `better?` is inclusive (like `<=`), then the last best element is returned.
+(define (find-best l better? #:? [key values] #:? [return-value? #f])
+  (unless (pair? l)
+    (raise-argument-error 'find-best "non-empty list" l))
+  (for/fold ([best (car l)]
+             [vbest (key (car l))]
+             #:result (if return-value? (values best vbest) best))
+            ([x (in-list (cdr l))])
+    (define vx (key x))
+    (if (better? vx vbest)
+      (values x vx)
+      (values best vbest))))
+
+(module+ test
+  (check-equal? (find-best (shuffle (range 10)) <)
+                0)
+  (check-equal? (find-best (shuffle (range 10)) >)
+                9)
+  (check-equal? (find-best (shuffle (range 1 10)) < #:key /)
+                9)
+  (check-equal? (call-with-values
+                 (λ () (find-best (shuffle (range 1 10)) < #:key / #:return-value? #t))
+                 list)
+                '(9 1/9))
+  (check-equal? (find-best '((a . 1) (a . 2) (b . 1) (b . 2)) < #:key cdr)
+                '(a . 1))
+  (check-equal? (find-best '((a . 1) (a . 2) (b . 1) (b . 2)) <= #:key cdr)
+                '(b . 1))
+  (check-equal? (call-with-values
+                 (λ () (find-best '((a . 1) (a . 2) (b . 1) (b . 2)) < #:key cdr #:return-value? #t))
+                 list)
+                (list '(a . 1) 1)))
+
