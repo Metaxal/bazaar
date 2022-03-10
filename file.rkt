@@ -175,7 +175,7 @@
   (define paths (directory-list dir #:build? #t))
   (define fbest
     (find-best (if afilter (filter afilter paths) paths)
-               < #:key file-or-directory-modify-seconds))
+               > #:key file-or-directory-modify-seconds))
   (if build?
     fbest
     (call-with-values (λ () (split-path fbest)) (λ (base name must-be-dir?) name))))
