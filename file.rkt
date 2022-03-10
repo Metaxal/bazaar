@@ -5,6 +5,7 @@
          racket/string
          racket/path
          bazaar/debug
+         bazaar/list
          syntax/modread) ; for properly reading modules
 
 (provide (all-defined-out))
@@ -164,3 +165,18 @@
       (port-count-lines! (current-input-port))
       (with-module-reading-parameterization
         read))))
+
+;; Returns the most recent path matching afilter (if not #f) within the director `dir`.
+;; For example, use `#:filter file-exists?` to return the most recent file.
+;; If `build?` is not #f, the full path is returned, otherwise only the last
+(define (most-recent-path dir #:? [build? #f] #:filter [afilter #f])
+  (assert (path-string? dir) dir)
+  (assert (or (not afilter) (and (procedure? afilter) (procedure-arity-includes? afilter 1))))
+  (define paths (directory-list dir #:build? #t))
+  (define fbest
+    (find-best (if afilter (filter afilter paths) paths)
+               < #:key file-or-directory-modify-seconds))
+  (if build?
+    fbest
+    (call-with-values (λ () (split-path fbest)) (λ (base name must-be-dir?) name))))
+
