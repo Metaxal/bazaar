@@ -45,10 +45,10 @@
   (check-exn exn:fail:read? (λ () (string->data " . "))))
 
 ;; copied/adapted from racket/file
-(define (string->value f #:mode [file-mode 'binary])
-  (call-with-input-string f #:mode file-mode read))
+(define (string->value f)
+  (call-with-input-string f read))
 
-(define (string->list f [r read] #:mode [file-mode 'binary])
+(define (string->list f [r read])
   (unless (and (procedure? r) (procedure-arity-includes? r 1))
     (raise-argument-error 'file->list "(procedure-arity-includes/c 1)" r))
   (call-with-input-string f (lambda (p) (for/list ([v (in-port r p)]) v))))
