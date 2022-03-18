@@ -159,7 +159,7 @@
 ;; Like `(proc file . args)`, but memoizes the result based on `equal?`
 ;; of `proc`, `file` and `args`, and whether the file has changed since
 ;; the last call, according to `file-or-directory-modify-seconds`.
-;; A delay can be specified to avoid reloading from file if the delay hasn't expired.
+;; A delay in seconds can be specified to avoid reloading from file if the delay hasn't expired.
 (define call/input-file-memoize
   (let ()
     (define h (make-hash))
@@ -168,7 +168,7 @@
       (define old (hash-ref h key #f))
       (define old-secs (and old (car old)))
       (define secs (file-or-directory-modify-seconds file-in))
-      (cond [(and old (< (+ old-secs delay) secs)) (apply values (cdr old))] ; memoized
+      (cond [(and old (<= secs (+ old-secs delay))) (apply values (cdr old))] ; memoized
             [else
              (define lres (call-with-values (λ () (apply proc file-in args)) list))
              (hash-set! h key (cons secs lres))
