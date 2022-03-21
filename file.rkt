@@ -160,6 +160,7 @@
 ;; of `proc`, `file` and `args`, and whether the file has changed since
 ;; the last call, according to `file-or-directory-modify-seconds`.
 ;; A delay in seconds can be specified to avoid reloading from file if the delay hasn't expired.
+;; A negative delay forces reloading.
 (define call/input-file-memoize
   (let ()
     (define h (make-hash))

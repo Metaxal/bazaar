@@ -16,12 +16,14 @@
    'dispatch-macro
    (case-lambda
      [(ch port) ; read-mode only (no read-syntax)
-     (define sym (read port))
-     (define str (symbol->string sym))
-     (vector (string->symbol (substring str 0 (- (string-length str) 1))))]
+      (define sym (read port))
+      (case sym
+        [(eof>) eof]
+        [else
+         (define str (symbol->string sym))
+         (vector (string->symbol (substring str 0 (- (string-length str) 1))))])]
      [(ch port src line col pos)
-      (error "not implemented")])
-   ))
+      (error "not implemented")])))
 
 (module+ test
   (require rackunit
@@ -46,6 +48,9 @@
 ;; `readtable-#<procedure:> above. See example in the tests below.
 ;; We could even write function applications.
 ;;
+;; Prefab structs could also be used but they are limited, in particular they
+;; can't be deserialized if they are mutable.
+;;
 ;; s: A result of `read`.
 ;; struct-dict: (dict-of symbol? procedure?)
 ;;  where the key is the symbolic name of the procedure as found in s,
@@ -63,9 +68,9 @@
           [(hash? s)
            (define assocs (map (λ (p) (cons (loop (car p)) (loop (cdr p))))
                                (hash->list s)))
-           (cond [(hash-equal? s) (make-hash assocs)]
-                 [(hash-eqv? s) (make-hasheqv assocs)]
-                 [(hash-eq? s) (make-hasheq assocs)])]
+           (cond [(hash-equal? s) (make-hash    assocs)]
+                 [(hash-eqv? s)   (make-hasheqv assocs)]
+                 [(hash-eq? s)    (make-hasheq  assocs)])]
           [else s])))
 
 (module+ test
