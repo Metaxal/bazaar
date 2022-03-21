@@ -48,7 +48,8 @@
 (define (string->value f)
   (call-with-input-string f read))
 
-(define (string->list f [r read])
+;; Can't name this `string->list` unfortunately.
+(define (string->list* f [r read])
   (unless (and (procedure? r) (procedure-arity-includes? r 1))
     (raise-argument-error 'file->list "(procedure-arity-includes/c 1)" r))
   (call-with-input-string f (lambda (p) (for/list ([v (in-port r p)]) v))))
