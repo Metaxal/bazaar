@@ -10,6 +10,10 @@
 
 (require define2)
 
+;;; NOTICE: Tests are based on `eq?`, so if a value is mutated
+;;; the memoization functions may return the wrong value.
+
+
 ;;; If using eq? we could use a weak-hasheq, but that means
 ;;; all arguments must be checked with eq? AND they must
 ;;; be held in a list of arguments that is itself eq?, which
@@ -85,6 +89,9 @@
                 (set! cache-val v)
                 (set! cache-args largs)
                 v]))]))
+
+(define-syntax-rule (apply/cache-last f arg ...)
+  (cache-last (f arg ...)))
 
 (module+ test
   ;; Make sure that the call is syntax-location specific
