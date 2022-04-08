@@ -56,18 +56,29 @@
 
 ;; Todo: Throw an exception when a cycle is detected?
 
+;; faster than (andmap eq? cache-args largs) 
+(define (fast-andmap2-eq? cs as)
+  (let loop ([cs cs] [as as])
+    (cond [(and (null? cs) (null? as))]
+          [(or (null? cs) (null? as))
+           #false]
+          [(not (and (pair? cs) (pair? as)))
+           (eq? cs as)]
+          [(eq? (car cs) (car as))
+           (loop (cdr cs) (cdr as))]
+          [else
+           #false])))
+
 ;; A simple form a memoization where if the syntax element is called with the same (eq?)
 ;; arguments, then the result is returned immediately without calculating it.
-;; Note that the same computation at two different syntax location make two separate computations.
+;; Note that the same computation at two different syntax locations make two separate computations.
 (define-syntax (cache-last stx)
   (syntax-parse stx
     [(_ (fun args ...))
-     #:with cache-val (syntax-local-lift-expression #'#f)
+     #:with cache-val  (syntax-local-lift-expression #'#f)
      #:with cache-args (syntax-local-lift-expression #''())
      #'(let ([largs (list args ...)])
-         (cond [(and (= (length cache-args) (length largs))
-                     (for/and ([c (in-list cache-args)] [a (in-list largs)])
-                       (eq? c a)))
+         (cond [(fast-andmap2-eq? cache-args largs)
                 cache-val]
                [else
                 (define v (apply fun largs))
@@ -75,21 +86,35 @@
                 (set! cache-args largs)
                 v]))]))
 
+(module+ test
+  ;; Make sure that the call is syntax-location specific
+  (check-equal? (let ([a 'a] [b 'b])
+                  (for/list ([x 3] [y 3])
+                    (list (cache-last (list a))
+                          (cache-last (list b)))))
+                '(((a) (b)) ((a) (b)) ((a) (b)))))
 
+;; racket -l racket/init -e '(require (submod bazaar/memoize stress-test))'
 (module+ stress-test
-  (define l (build-list 100000 (λ (i) (random))))
-  ;; Extremely fast
+  (require bazaar/debug)
+  (define N 100000)
+  (define l (build-list N (λ (i) (random))))
+  
+  ;; Extremely fast because 
   (time
-   (for/sum ([i 100000])
-     (cache-last (length l))))
+   (for/sum ([i N])
+     ;; Just to make sure `cache-last` caches values per syntax point
+     (assert (equal? (cache-last (+ 3 2)) 5))
+     (if (equal? (cache-last (length l)) N) 1 0)))
+
+  ;; Slow because l2 is not `eq?` from one iteration to the next
+  ;; (unless the compiler is smart enough, which it currently isn't).
+  (time
+   (for/sum ([i N])
+     (define l2 (cons 'a l))
+     (if (= (cache-last (length l2)) (+ N 1)) 1 0)))
 
   ;; Slow because no caching
   (time
-   (for/sum ([i 100000])
-     (length l)))
-
-  ;; Slow because can't reuse the previous cache
-  (time
-   (for/sum ([i 100000])
-     (define l (build-list 100000 (λ (i) (random))))
-     (cache-last (length l)))))
+   (for/sum ([i N])
+     (if (= (length l) N) 1 0))))
