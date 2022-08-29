@@ -122,25 +122,34 @@
 (define-syntax (with-struct stx)
   (syntax-parse stx
     [(_ struct-obj:expr struct-id:id (field:id/maybe-rename ...) body ...)
-     (with-syntax* ([(get-id ...) (map (λ(fid)(format-id #'struct-id "~a-~a" #'struct-id fid))
+     (with-syntax* ([(get-id ...) (map (λ (fid) (format-id #'struct-id "~a-~a" #'struct-id fid))
+                                       (syntax->list #'(field.old-id ...)))]
+                    [(set-id! ...) (map (λ (fid) (format-id #'struct-id "set-~a-~a!" #'struct-id fid))
                                        (syntax->list #'(field.old-id ...)))])
        #'(let ([obj struct-obj])
-           (let ([field.new-id (get-id obj)] ...)
+           (let-syntax ([field.new-id
+                         (make-set!-transformer
+                          (λ (stx)
+                            (syntax-case stx (set!)
+                              [(set! id v) #'(set-id! obj v)]
+                              [id (identifier? #'id) #'(get-id obj)])))]
+                        ...)
              body ...)))]))
 
+;; Doesn't support setter yet
 (define-syntax (with-struct.id stx)
   (syntax-parse stx
     [(_ struct-obj-id:id struct-id:id (id:id ...) body ...)
-     (with-syntax* ([(get-id ...) (map (λ(fid)(format-id #'struct-id "~a-~a" #'struct-id fid))
+     (with-syntax* ([(get-id ...) (map (λ (fid) (format-id #'struct-id "~a-~a" #'struct-id fid))
                                        (syntax->list #'(id ...)))]
-                    [(set-id ...) (map (λ(fid)(format-id #'struct-id "~a.~a" #'struct-obj-id fid))
+                    [(set-id ...) (map (λ (fid) (format-id #'struct-id "~a.~a" #'struct-obj-id fid))
                                        (syntax->list #'(id ...)))])
        #'(let ([set-id (get-id struct-obj-id)] ...)
            body ...))]))
 
 
 (module+ test
-  (struct A (a b c))
+  (struct A (a b c) #:mutable #:transparent)
   
   (define A1 (A 1 2 3))
   
@@ -148,11 +157,17 @@
    (with-struct A1 A (a b [c d])
                 (list b d a))
    '(2 3 1))
+  (with-struct A1 A (a b [c d])
+    (set! a 5)
+    (set! d 6)
+    (check-equal? (list a b d)
+                  '(5 2 6)))
+  
   
   (check-equal?
    (with-struct.id A1 A (a b c)
                   (list A1.b A1.c A1.a))
-   '(2 3 1)))
+   '(2 6 5)))
 
 ;; For struct objects, saves a name and a pair of parenthesis (for clarity)
 ;; Assumes the first argument to method is the object itself
