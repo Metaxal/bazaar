@@ -136,16 +136,55 @@
                         ...)
              body ...)))]))
 
-;; Doesn't support setter yet
+(define-syntax (define-with-struct stx)
+  (syntax-parse stx
+    [(_ struct-obj:id struct-id:id (field:id/maybe-rename ...))
+     (with-syntax* ([(get-id ...) (map (λ (fid) (format-id #'struct-id "~a-~a" #'struct-id fid))
+                                       (syntax->list #'(field.old-id ...)))]
+                    [(set-id! ...) (map (λ (fid) (format-id #'struct-id "set-~a-~a!" #'struct-id fid))
+                                       (syntax->list #'(field.old-id ...)))])
+       #'(begin (define-syntax field.new-id
+                  (make-set!-transformer
+                   (λ (stx)
+                     (syntax-case stx (set!)
+                       [(set! id v) #'(set-id! struct-obj v)]
+                       [id (identifier? #'id) #'(get-id struct-obj)]))))
+                 ...))]))
+
 (define-syntax (with-struct.id stx)
   (syntax-parse stx
-    [(_ struct-obj-id:id struct-id:id (id:id ...) body ...)
+    [(_ struct-obj:id struct-id:id (field:id ...) body ...)
      (with-syntax* ([(get-id ...) (map (λ (fid) (format-id #'struct-id "~a-~a" #'struct-id fid))
-                                       (syntax->list #'(id ...)))]
-                    [(set-id ...) (map (λ (fid) (format-id #'struct-id "~a.~a" #'struct-obj-id fid))
-                                       (syntax->list #'(id ...)))])
-       #'(let ([set-id (get-id struct-obj-id)] ...)
+                                       (syntax->list #'(field ...)))]
+                    [(set-id! ...) (map (λ (fid) (format-id #'struct-id "set-~a-~a!" #'struct-id fid))
+                                        (syntax->list #'(field ...)))]
+                    [(obj.id ...) (map (λ (fid) (format-id #'struct-id "~a.~a" #'struct-obj fid))
+                                       (syntax->list #'(field ...)))])
+       #'(let-syntax ([obj.id
+                       (make-set!-transformer
+                        (λ (stx)
+                          (syntax-case stx (set!)
+                            [(set! id v) #'(set-id! struct-obj v)]
+                            [id (identifier? #'id) #'(get-id struct-obj)])))]
+                      ...)
            body ...))]))
+
+(define-syntax (define-with-struct.id stx)
+  (syntax-parse stx
+    [(_ struct-obj:id struct-id:id (field:id ...))
+     (with-syntax* ([(get-id ...) (map (λ (fid) (format-id #'struct-id "~a-~a" #'struct-id fid))
+                                       (syntax->list #'(field ...)))]
+                    [(set-id! ...) (map (λ (fid) (format-id #'struct-id "set-~a-~a!" #'struct-id fid))
+                                       (syntax->list #'(field ...)))]
+                    [(obj.id ...) (map (λ (fid) (format-id #'struct-id "~a.~a" #'struct-obj fid))
+                                       (syntax->list #'(field ...)))])
+       #'(begin (define-syntax obj.id
+                  (make-set!-transformer
+                   (λ (stx)
+                     (syntax-case stx (set!)
+                       [(set! id v) #'(set-id! struct-obj v)]
+                       [id (identifier? #'id) #'(get-id struct-obj)]))))
+                 ...))]))
 
 
 (module+ test
@@ -167,7 +206,14 @@
   (check-equal?
    (with-struct.id A1 A (a b c)
                   (list A1.b A1.c A1.a))
-   '(2 6 5)))
+   '(2 6 5))
+
+  (let ()
+    (define A1 (A 1 2 3))
+    (define-with-struct.id A1 A (a b c))
+    (set! A1.a 12)
+    (check-equal? (list A1.a A1.b (A-c A1))
+                  '(12 2 3))))
 
 ;; For struct objects, saves a name and a pair of parenthesis (for clarity)
 ;; Assumes the first argument to method is the object itself
