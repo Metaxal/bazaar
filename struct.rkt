@@ -7,7 +7,9 @@
 
 (provide struct+
          with-struct
+         define-with-struct
          with-struct.id
+         define-with-struct.id
          call
          call/apply)
 
