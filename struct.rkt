@@ -133,8 +133,14 @@
                          (make-set!-transformer
                           (λ (stx)
                             (syntax-case stx (set!)
-                              [(set! id v) #'(set-id! obj v)]
-                              [id (identifier? #'id) #'(get-id obj)])))]
+                              [(set! id v)
+                               ;; free-identifier=? doesn't work for some reason
+                               (eq? (syntax-e #'field.new-id) (syntax-e #'id))
+                               #'(set-id! obj v)]
+                              [(id args (... ...)) #;(identifier? #'id)
+                                                   #'((get-id obj) args (... ...))]
+                              [id #;(identifier? #'id) #'(get-id obj)]
+                              )))]
                         ...)
              body ...)))]))
 
@@ -150,6 +156,8 @@
                    (λ (stx)
                      (syntax-case stx (set!)
                        [(set! id v) #'(set-id! struct-obj v)]
+                       [(id args (... ...)) #;(identifier? #'id)
+                                            #'((get-id struct-obj) args (... ...))]
                        [id (identifier? #'id) #'(get-id struct-obj)]))))
                  ...))]))
 
@@ -167,6 +175,8 @@
                         (λ (stx)
                           (syntax-case stx (set!)
                             [(set! id v) #'(set-id! struct-obj v)]
+                            [(id args (... ...)) #;(identifier? #'id)
+                                                   #'((get-id struct-obj) args (... ...))]
                             [id (identifier? #'id) #'(get-id struct-obj)])))]
                       ...)
            body ...))]))
@@ -185,6 +195,8 @@
                    (λ (stx)
                      (syntax-case stx (set!)
                        [(set! id v) #'(set-id! struct-obj v)]
+                       [(id args (... ...)) #;(identifier? #'id)
+                                            #'((get-id struct-obj) args (... ...))]
                        [id (identifier? #'id) #'(get-id struct-obj)]))))
                  ...))]))
 
@@ -229,10 +241,30 @@
 (module+ test
   (let ()
     (struct A (x proc))
-    (define a1 (A 3 (λ(this v1 v2)(list (A-x this) v1 v2))))
+    (define a1 (A 3 (λ (this v1 v2) (list (A-x this) v1 v2))))
     (check-equal? (call A-proc a1 4 5) (list 3 4 5))
     (check-equal? (call/apply A-proc a1 '(5 6)) '(3 5 6))
-    ))
+    )
+
+  (let ()
+    (struct A (op))
+    (define A1 (A +))
+    (check-equal?
+     (with-struct A1 A (op)
+       (op 1 2))
+     3)
+    (check-equal?
+     (with-struct.id A1 A (op)
+       (A1.op 1 2))
+     3)
+    (define-with-struct A1 A ([op op2]))
+    (check-equal?
+     (op2 1 2)
+     3)
+    (define-with-struct.id A1 A (op))
+    (check-equal?
+     (A1.op 1 2)
+     3)))
 
 ;; Possibly interesting helper for updaters and others (but here is not the place)
 #;
@@ -257,4 +289,3 @@
 ;;; (p1 x) ; get x
 ;;; (p1 x 10) ; set x
 ;;; (p1 x v (+ v 10)) ; increment x by 10 (or use a more functional style)
-
