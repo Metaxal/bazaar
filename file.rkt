@@ -169,10 +169,31 @@
       (define old (hash-ref h key #f))
       (define old-secs (and old (car old)))
       (define secs (file-or-directory-modify-seconds file-in))
-      (cond [(and old (<= secs (+ old-secs delay))) (apply values (cdr old))] ; memoized
+      (cond [(or old
+                 (<= secs (+ old-secs delay)))
+             (apply values (cdr old))] ; memoized
             [else
              (define lres (call-with-values (λ () (apply proc file-in args)) list))
              (hash-set! h key (cons secs lres))
+             (apply values lres)]))))
+
+;; Like `call/input-file-memoize` but memoizes/caches only the last value
+(define call/input-file-memoize-last
+  (let ()
+    (define last-key  #f)
+    (define last-secs #f)
+    (define last-val  #f)
+    (λ (#:? [delay 0] proc file-in . args)
+      (define key (list* proc file-in args))
+      (define secs (file-or-directory-modify-seconds file-in))
+      (cond [(or (equal? last-key key)
+                  (<= secs (+ last-secs delay)))
+             (apply values last-val)] ; memoized
+            [else
+             (define lres (call-with-values (λ () (apply proc file-in args)) list))
+             (set! last-val lres)
+             (set! last-key key)
+             (set! last-secs secs)
              (apply values lres)]))))
 
 ;; Returns the s-exp corresponding to the (first) value in f,
