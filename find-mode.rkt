@@ -13,12 +13,12 @@
  (contract-out
   ; Main function with all the features
   [find-mode
-   (-> (procedure-arity-includes/c 1)
-       real? real?
-       (procedure-arity-includes/c 2)
-       #:ε (or/c #f positive?)
-       #:fε (or/c #f positive?)
-       #:n (or/c #f exact-nonnegative-integer?)
+   (->* [(procedure-arity-includes/c 1)
+         real? real?
+         (procedure-arity-includes/c 2)]
+        [#:ε (or/c #f positive?)
+         #:fε (or/c #f positive?)
+         #:n (or/c #f exact-nonnegative-integer?)]
        list?)]
   ; Convenience, simpler functions
   [minimize
